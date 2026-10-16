@@ -19,19 +19,19 @@ function _matches(state, key, identities)
     return true
 end
 
-function check(target, module, args)
+function check(target, settings, args)
     import("core.tool.compiler")
     import("core.base.json")
     import("core.base.bytes")
     local parse_deps = import("core.tools.gcc.parse_deps", {anonymous = true})
     local identities = {}
-    local tidy = module:data("narrow.tidy")
+    local tidy = settings.tidy
     local program = compiler.load("cxx", {target = target}):program()
-    local inputs = {3, os.curdir(), program, args}
+    local inputs = {4, os.curdir(), program, args}
     local cacheable = true
-    local tools = {program, tidy, path.absolute(module:targetfile()), module:data("narrow.policy"),
+    local tools = {program, tidy, settings.plugin, settings.policy,
                    path.join(os.scriptdir(), "rules.lua"), path.join(os.scriptdir(), "incremental.lua"),
-                   path.join(os.scriptdir(), "llvm.lua")}
+                   path.join(os.scriptdir(), "llvm.lua"), path.join(os.scriptdir(), "analysis.lua")}
     for _, file in ipairs(tools) do
         local identity = _identity(file, identities)
         cacheable = cacheable and identity ~= false

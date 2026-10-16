@@ -53,7 +53,7 @@ A suppression is a diagnostic mechanism, not policy authorization. It cannot mak
 
 ## Verification and remaining work
 
-See the [README verification guide](../README.md#build-and-verify) for commands and current suite coverage, and the [integration guide](../README.md#run-on-a-consuming-project) for CMake/xmake setup and CI rechecks. Every enabled check has diagnostic evidence linked from the [inventory](rule-inventory.md). The harness checks names, locations, severity and process status, rejecting compiler errors and tool failures. Fixtures verify their examples, not general policy compliance.
+See the [contributor verification guide](../CONTRIBUTING.md#build-and-verify) for commands and current suite coverage, and the [README](../README.md#use-in-your-project) for CMake/xmake setup and [CI rechecks](../README.md#full-rechecks-and-ci). Every enabled check has diagnostic evidence linked from the [inventory](rule-inventory.md). The harness checks names, locations, severity and process status, rejecting compiler errors and tool failures. Fixtures verify their examples, not general policy compliance.
 
 The current checks do not establish general lifetime/bounds safety, shared-lifetime intent, callback escape safety, nonempty owning callbacks, exception safety, task exception containment, failure-state guarantees, accurate noexcept/annotation contracts, contract predicate effects, arbitrary SFINAE/framework classification, error-combinator length, or scheduler architecture. C++26 reflection/expansion syntax and contracts need toolchain-specific work. Recognizing a facility's name is not evidence that every unavailable C++26 header or module has been integrated.
 

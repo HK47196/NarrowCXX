@@ -23,6 +23,8 @@ target("NarrowTidy")
     add_files("checks/NarrowTidyModule.cpp", "checks/LanguageChecks.cpp",
               "checks/LibraryChecks.cpp", "checks/GenericChecks.cpp",
               "checks/PreprocessorChecks.cpp")
+    add_installfiles(".clang-tidy", {prefixdir = "share/narrow-cpp"})
+    add_installfiles("xmake/*.lua", {prefixdir = "share/narrow-cpp/xmake"})
     on_load(function (target)
         import("xmake.llvm", {rootdir = os.scriptdir()}).configure(target)
         target:data_set("narrow.policy", path.join(os.scriptdir(), ".clang-tidy"))

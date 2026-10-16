@@ -24,7 +24,7 @@ The regression fixtures were exercised against the previous implementation to es
 
 ## Inventory rationale
 
-The audit separated enforcement route, assessment and verification so a tested example no longer implies that every API or semantic clause in its row is covered. It added explicit review obligations for simplicity, local boundary permissions, preferring existing facilities, and necessary compatibility exceptions. The generated [inventory](rule-inventory.md) holds the current evidence and gaps; the [README](../README.md#maintain-the-workspace) explains regeneration and validation.
+The audit separated enforcement route, assessment and verification so a tested example no longer implies that every API or semantic clause in its row is covered. It added explicit review obligations for simplicity, local boundary permissions, preferring existing facilities, and necessary compatibility exceptions. The generated [inventory](rule-inventory.md) holds the current evidence and gaps; the [contributor guide](../CONTRIBUTING.md#maintain-the-workspace) explains regeneration and validation.
 
 ## Upstream regression follow-up
 
@@ -67,6 +67,6 @@ Review of this pass reproduced macro collisions introduced by expansion-location
 
 ## Integration rationale and limits
 
-Use the [README](../README.md#run-on-a-consuming-project) for CMake/xmake setup, forced rechecks and platform/cache limits. Both adapters keep plugin-load verification unconditional because clang-tidy can continue after a loading failure. The xmake rule has a build fence to finish the plugin before consumer hooks, and streams successful warning output because quiet execution helpers would hide restrictions. Its dependency extraction uses joined cc1 arguments because ClangTool strips ordinary -MD/-MF flags; atomic cache writes and removal of previous successes before retries protect against recording failed analysis.
+Use the [README](../README.md#use-in-your-project) for CMake/xmake setup, [CI rechecks](../README.md#full-rechecks-and-ci), and [platform limits](../README.md#llvm-selection-and-platform-support). Both adapters keep plugin-load verification unconditional because clang-tidy can continue after a loading failure. The local xmake integration has a build fence to finish the plugin before consumer hooks; the Git package installs the host plugin before building consumers. Both xmake rules share the same analysis entry point and stream successful warning output because quiet execution helpers would hide restrictions. Its dependency extraction uses joined cc1 arguments because ClangTool strips ordinary -MD/-MF flags; atomic cache writes and removal of previous successes before retries protect against recording failed analysis.
 
 The [catalog limitations](custom-checks.md#verification-and-remaining-work) and per-item [inventory](rule-inventory.md) remain the current account of unproved behavior. This audit's LLVM 23.1.1 Linux results do not establish macOS, full C++26 library, contracts/reflection or import-std integration.
