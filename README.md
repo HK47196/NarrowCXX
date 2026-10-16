@@ -1,75 +1,43 @@
 # Narrow C++ clang-tidy checks
 
-A clang-tidy module and enforcement profile for the [Narrow C++ draft](policy/narrow-cpp.md). The module has **29 custom checks**, combined with **13 upstream checks**. Detected bans are errors; restricted uses and other advisory findings remain warnings. The checks cover documented mechanical subsets, not full policy compliance.
+A clang-tidy module and enforcement profile for the [Narrow C++ draft](policy/narrow-cpp.md): **29 custom checks + 13 upstream checks**.
 
-Start with the [check catalog](docs/custom-checks.md) for behavior, the [coverage inventory](docs/rule-inventory.md) for evidence and gaps, and the [audit](docs/audit.md) for verified limitations.
+Detected bans fail analysis; restricted uses and advisory findings remain warnings. Coverage is partial: a clean run does not establish policy compliance or general lifetime/bounds safety. Start with the [check catalog](docs/custom-checks.md), [coverage inventory](docs/rule-inventory.md), and [audit](docs/audit.md).
 
 ## Build and verify
 
-The module targets LLVM **23** and was tested on Linux with LLVM/Clang/clang-tidy **23.1.1**. Building it needs the LLVM and Clang development libraries, a C++20 compiler, and either CMake 3.25+ or xmake 3.1.1+. Regression tests also need Python 3.10+. The consuming-project CMake helper requires CMake 3.27+ and a Ninja or Makefiles generator. Use the same LLVM installation for the module and clang-tidy; both builds check the major version, but patch-level binary compatibility is not promised. Ninja is used below; [native xmake instructions](#native-xmake) follow the CMake integration example.
+Requires a C++20 compiler, LLVM **23** development headers and shared Clang/LLVM libraries, matching `clang-tidy` and `llvm-config`, and CMake **3.25+** or xmake **3.1.1+**. Use one LLVM installation; matching major versions do not guarantee binary compatibility. Recorded verification is Linux with LLVM **23.1.1**; macOS remains unverified. A Unix host is required; cross-compilation needs separate host tools.
+
+For multiple LLVM installations, select CMake tools with `NARROW_CLANG_TIDY`/`NARROW_LLVM_CONFIG` and packages with `LLVM_DIR`/`Clang_DIR`; xmake uses `--narrow_clang_tidy`/`--narrow_llvm_config`.
+
+For CMake and Ninja:
 
 ```sh
 cmake -S . -B build -G Ninja \
-  -DCMAKE_C_COMPILER=/usr/bin/clang \
-  -DCMAKE_CXX_COMPILER=/usr/bin/clang++ \
-  -DLLVM_DIR="$(llvm-config --cmakedir)" \
-  -DClang_DIR="$(llvm-config --cmakedir)/../clang"
+  -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
 cmake --build build
 ctest --test-dir build --output-on-failure
 ```
 
-The default configuration provides five CTest suites: custom, integrated, and module diagnostics; combined configuration; and inventory/registry validation, including generated Markdown freshness. The integrated suite includes ban/restriction severity, exit status, and local suppression cases. The diagnostic suites cover 32 translation units/interfaces and their project headers. All 42 enabled checks have diagnostic fixtures. The harness rejects missing or unexpected diagnostics, incorrect severity/status, compiler errors, and tool failures. Expected policy errors must match exactly.
-
-For static inventory validation only, configure with `-DNARROW_BUILD_PLUGIN=OFF`; this registers one suite. It needs Python but does not build or load the module or require LLVM/clang-tidy.
-
-Diagnostic fixtures use `-std=c++2c`, exceptions, and RTTI so the checks can inspect forbidden syntax. Dedicated negative cases disable exceptions. Module tests precompile a named interface and check an imported alias; full C++26 library, contracts, reflection, and `import std` integration remain unverified.
+Tests require Python **3.10+** and cover diagnostics, severity, exit status, plugin configuration, and inventory freshness. They default on standalone, off as a dependency; change with `NARROW_BUILD_TESTING`. `-DNARROW_BUILD_PLUGIN=OFF` registers inventory-only tests without LLVM.
 
 ## Run on a consuming project
 
+Vendor this checkout at `third_party/narrow_cpp`, then opt targets in. Both adapters build/load the plugin and bundled profile without linking it into your application.
+
 ### CMake
 
-Add this project as a build-tool dependency and opt individual targets in:
+Requires CMake **3.27+**, Ninja or Makefiles, and an existing local compiled target:
 
 ```cmake
-cmake_minimum_required(VERSION 3.27)
-project(MyApp LANGUAGES CXX)
-
-include(FetchContent)
-FetchContent_Declare(narrow_cpp
-  SOURCE_DIR "/absolute/path/to/NarrowC++"
-)
-FetchContent_MakeAvailable(narrow_cpp)
-
+add_subdirectory(third_party/narrow_cpp)
 add_executable(app main.cpp)
 narrow_enable_tidy(app)
 ```
 
-For a remote dependency, replace `SOURCE_DIR` with `GIT_REPOSITORY` and a pinned `GIT_TAG`. A vendored checkout works with `add_subdirectory(third_party/narrow_cpp)` followed by the same helper call.
-
-The [helper](cmake/NarrowTidy.cmake) builds `NarrowTidy`, verifies that clang-tidy loaded it, and then checks the selected target's C++ sources through `CXX_CLANG_TIDY`. It supplies the generated module path and bundled policy automatically. Verification runs before compilation, including on otherwise up-to-date builds, so an ignored plugin-loading failure still fails the build. The module is a build tool and is not linked into the application. Other application targets are unchanged, and the module's own compilation does not inherit the consumer's lint command.
-
-```sh
-cmake -S . -B build -G Ninja
-cmake --build build
-```
-
-clang-tidy runs alongside compilation, so incremental builds analyze only sources that CMake recompiles. Changes to the policy contents or plugin alone do not force unchanged application sources to recompile. Newly added optional headers or headers that shadow existing includes can also require a forced recheck. Plugin verification still runs on every build, but does not analyze those sources.
-
-In CI, use a fresh build directory or force a clean rebuild that includes every opted-in target:
-
-```sh
-cmake --build build --clean-first
-```
-
-Use the same command locally when a full recheck is needed. Keep the source tree stable while checks run.
-
-CMake tests default **on** for a standalone build and **off** when added through `FetchContent` or `add_subdirectory`. Set `NARROW_BUILD_TESTING=ON` before adding the dependency to opt in, or `OFF` to disable standalone tests. Python is only needed when these tests are enabled. Fetching this project does not install LLVM or clang-tidy; matching LLVM 23 development tools must already be available. `NARROW_CLANG_TIDY`, `NARROW_LLVM_CONFIG`, `LLVM_DIR`, and `Clang_DIR` can select a particular installation.
-
-The helper applies to existing local executable or compiled-library targets, requires `NARROW_BUILD_PLUGIN=ON`, and replaces the selected target's `CXX_CLANG_TIDY` command. This integration builds the plugin with the current toolchain for a native host build. Cross-compilation requires a separate host-tool setup.
+The [helper](cmake/NarrowTidy.cmake) replaces that target's `CXX_CLANG_TIDY` command. Build normally with `cmake --build build`.
 
 ### Native xmake
-
-Vendor this checkout and include its native build definition:
 
 ```lua
 set_xmakever("3.1.1")
@@ -81,28 +49,19 @@ target("app")
     add_rules("narrow.tidy")
 ```
 
-Configure and build normally, for example with Clang:
+Run `xmake f --toolchain=clang` then `xmake build`. This [native build](xmake.lua) needs neither CMake nor Python. Use ordinary builds, not `xmake check clang.tidy`. xmake-specific module/PCH/generated-source workflows remain unverified.
+
+### Full rechecks and CI
+
+CMake checks recompiled sources; xmake caches successful analysis using recorded inputs. Policy/plugin changes alone do not recompile CMake consumers. Added/shadowing headers, indirect configuration, response files, module/PCH/VFS inputs, or toolchain changes can require forced rechecks. Keep inputs stable during analysis.
+
+Use a fresh build directory in CI, or recheck **every opted-in target**:
 
 ```sh
-xmake f --toolchain=clang --cc=/usr/bin/clang --cxx=/usr/bin/clang++ -o build/xmake
-xmake build
-```
-
-The [native target](xmake.lua) builds the plugin directly; it needs neither CMake nor Python. LLVM 23 development headers, shared `clang-cpp`/LLVM libraries, and matching clang-tidy must already be installed. Select tools with `xmake f --narrow_llvm_config=/path/to/llvm-config --narrow_clang_tidy=/path/to/clang-tidy`. The plugin is a build dependency and is not linked into the application. Including the checkout registers no tests and only builds the plugin when a selected target needs it. From this checkout itself, `xmake build NarrowTidy` builds the standalone module; `xmake show -t NarrowTidy` reports its output path.
-
-The [enforcement rule](xmake/rules.lua) loads the generated plugin and bundled policy and analyzes the selected target's C++ source batches with their target and per-file compilation options. C sources compile normally. Restricted warnings stay visible without `-v`; bans and tool failures stop the build. Other targets opt in separately.
-
-Successful analysis is cached per translation unit using the source and transitive headers reported by clang-tidy, including system headers. Changes to those files, target/per-file compiler flags, selected compiler/tidy executables, include-path environment variables, the bundled policy, plugin, or enforcement implementation invalidate cached results. Recorded file identities include content hashes and modification times, so edits with preserved timestamps are detected. Unchanged units skip analysis without a separate preprocessing pass or LLVM library scan. Failed checks are never cached. Warnings appear when analysis runs; plugin-load verification runs on every build.
-
-This is a local development cache with known limits. Newly added optional headers (`__has_include`), higher-priority headers that shadow existing includes, indirect inputs such as response-file contents, inherited configuration, module/PCH/VFS data, and toolchain/runtime upgrades can require a forced recheck. Inputs must remain stable while checks run.
-
-In CI, use a fresh build directory or force fresh checks for every opted-in target:
-
-```sh
+cmake --build build --clean-first
+# Or, for each xmake target:
 xmake build -r app
 ```
-
-When dependencies are already built and current, `xmake build -r --shallow app` rechecks every application source without rebuilding the plugin. Use the same commands locally after changing inputs outside the cache's recorded dependencies.
 
 The native adapter was verified on Linux/Clang with xmake 3.1.1. The build includes macOS shared-library settings, but that platform and xmake-specific module/PCH/generated-source workflows remain unverified. Cross-compilation is rejected by the native plugin build; it needs a separate host-tool setup. The integration uses ordinary xmake builds; the built-in `xmake check clang.tidy` command does not accept the plugin's `--load` option in xmake 3.1.1.
 
