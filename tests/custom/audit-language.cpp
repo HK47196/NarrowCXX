@@ -46,6 +46,7 @@ void forward_like_api(T& value) {
 
 struct CInterface {
     int invoke(int, ...); // expect: narrow-restricted-c-varargs
+    int fixed(int, int);
 };
 void member_varargs(CInterface& api) {
     api.invoke(1, 2); // expect: narrow-restricted-c-varargs
@@ -57,6 +58,48 @@ void member_varargs(CInterface& api) {
     int sum;
     __builtin_add_overflow(1, 2, &sum); // expect: narrow-restricted-low-level
     __builtin_isfinite(1.0); // expect: narrow-restricted-low-level
+}
+
+template <class Output>
+int emit_number(Output output, int value) {
+    return output("%d", value); // expect: narrow-restricted-c-varargs
+}
+int alternate_output(const char*, ...) noexcept; // expect: narrow-restricted-c-varargs
+int typed_output(const char*, int);
+template <class Output>
+int typed_emit_number(Output output, int value) {
+    return output("%d", value);
+}
+template <class Output>
+int adapter_emit_number(Output output, int value) {
+    // NOLINTNEXTLINE(narrow-restricted-c-varargs) -- Required C adapter output.
+    return output("%d", value);
+}
+int instantiate_output(int value) {
+    emit_number(typed_output, value); // A safe instantiation must not hide later violations.
+    emit_number(std::printf, value);
+    emit_number(std::printf, value + 1);
+    emit_number(alternate_output, value); // A distinct specialization, one authored call.
+    typed_emit_number(typed_output, value);
+    adapter_emit_number(std::printf, value);
+    return emit_number(std::printf, value);
+}
+
+using MemberCallback = int (CInterface::*)(int, ...); // expect: narrow-restricted-c-varargs
+void indirect_member_varargs(CInterface& api, MemberCallback member) {
+    (api.*member)(1, 2); // expect: narrow-restricted-c-varargs
+    ((&api)->*member)(1, 2); // expect: narrow-restricted-c-varargs
+    // NOLINTNEXTLINE(narrow-restricted-c-varargs) -- Required C adapter call.
+    (api.*member)(1, 2);
+}
+template <class Member>
+int dependent_member_varargs(CInterface& api, Member member) {
+    return (api.*member)(1, 2); // expect: narrow-restricted-c-varargs
+}
+void instantiate_member_varargs(CInterface& api) {
+    dependent_member_varargs(api, &CInterface::fixed);
+    dependent_member_varargs(api, &CInterface::invoke);
+    dependent_member_varargs(api, &CInterface::invoke);
 }
 
 template <typename T>

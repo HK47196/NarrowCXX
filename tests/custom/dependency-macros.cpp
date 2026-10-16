@@ -4,6 +4,7 @@
 #include <csetjmp>
 #include <cstdlib>
 #include <expected>
+#include <cstdio>
 
 void dependency_implementation(int value) {
     EXTERNAL_DISCARD(value);
@@ -28,4 +29,10 @@ void dependency_c_implementation(void* output, const void* input, std::jmp_buf& 
 
 void distinct_expected_uses(std::expected<int, int>& first, std::expected<int, int>& second) {
     EXTERNAL_DISCARD(first.value() + second.value()); // expect: narrow-expected-usage, narrow-expected-usage
+}
+
+void dependency_varargs(int value) {
+    EXTERNAL_PRINT(value);
+    external_emit(std::printf, value);
+    EXTERNAL_DISCARD(std::printf("%d", value) + std::printf("%d", value)); // expect: narrow-restricted-c-varargs, narrow-restricted-c-varargs
 }

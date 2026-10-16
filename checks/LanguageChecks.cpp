@@ -315,10 +315,9 @@ public:
     Finder->addMatcher(
         traverse(TK_IgnoreUnlessSpelledInSource, typeLoc().bind("prototype")),
         this);
+    // Callable templates need resolved instantiations to expose C varargs.
     Finder->addMatcher(
-        traverse(TK_IgnoreUnlessSpelledInSource,
-                 callExpr(unless(isExpansionInSystemHeader())).bind("call")),
-        this);
+        callExpr(unless(isExpansionInSystemHeader())).bind("call"), this);
     Finder->addMatcher(
         traverse(TK_IgnoreUnlessSpelledInSource,
                  stmt(isVarargAccess(), unless(isExpansionInSystemHeader()))
@@ -342,6 +341,8 @@ public:
           diag(Loc->getBeginLoc(),
                "va_list machinery requires a required C adapter");
     if (const auto *Call = Result.Nodes.getNodeAs<CallExpr>("call")) {
+      if (Call->getCallee()->isTypeDependent())
+        return;
       const FunctionDecl *FD = Call->getDirectCallee();
       const std::string Name = FD ? FD->getNameAsString() : "";
       const bool VaBuiltin =
@@ -351,6 +352,10 @@ public:
       // A nonstatic member callee has bound-member type in the expression;
       // its declaration still carries the actual function prototype.
       QualType CalleeType = FD ? FD->getType() : Call->getCallee()->getType();
+      if (CalleeType->isSpecificBuiltinType(BuiltinType::BoundMember))
+        CalleeType = Expr::findBoundMemberType(Call->getCallee());
+      if (CalleeType.isNull())
+        return;
       if (CalleeType->isPointerType())
         CalleeType = CalleeType->getPointeeType();
       const auto *Prototype = CalleeType->getAs<FunctionProtoType>();
@@ -360,16 +365,28 @@ public:
           (!Result.Context->BuiltinInfo.isLibFunction(FD->getBuiltinID()) ||
            Result.Context->BuiltinInfo.hasCustomTypechecking(
                FD->getBuiltinID()));
-      if (VaBuiltin || (!Intrinsic && Prototype && Prototype->isVariadic()))
-        if (firstAt(Call->getExprLoc(), *Result.SourceManager))
-          diag(Result.SourceManager->getExpansionLoc(Call->getExprLoc()),
+      if (VaBuiltin || (!Intrinsic && Prototype && Prototype->isVariadic())) {
+        const SourceManager &SM = *Result.SourceManager;
+        const SourceLocation Loc = Call->getExprLoc();
+        // Public va_* macros intentionally expose system argument machinery;
+        // other dependency implementation calls are not authored uses.
+        if (!VaBuiltin && SM.isInSystemHeader(SM.getSpellingLoc(Loc)))
+          return;
+        if (userLocation(Loc, SM) &&
+            SeenCalls.insert(Loc.getRawEncoding()).second)
+          diag(VaBuiltin ? SM.getExpansionLoc(Loc) : Loc,
                "C variadic calls and argument machinery "
                "require a required C adapter");
+      }
     }
     if (const auto *E = Result.Nodes.getNodeAs<VAArgExpr>("argument"))
       diag(Result.SourceManager->getExpansionLoc(E->getBeginLoc()),
            "C varargs access requires a required C adapter");
   }
+
+private:
+  // Instantiations share an authored token; distinct macro arguments do not.
+  llvm::DenseSet<unsigned> SeenCalls;
 };
 
 AST_MATCHER(Stmt, isIndirectGoto) { return isa<IndirectGotoStmt>(Node); }
