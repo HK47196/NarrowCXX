@@ -1,0 +1,1378 @@
+{
+  "schema_version": 2,
+  "source": "source.json",
+  "note": "Coverage inventory for the complete draft 0.1, sequence 11, audited 15 October 2026. The combined profile fails diagnosed bans and warns on restricted uses. Routes and evidence describe implemented subsets, not compliance percentages or whole-program safety.",
+  "rules": [
+    {
+      "id": "simplicity",
+      "source_block": "bfc50d32-3ba6-496d-9981-fbd361043a7f",
+      "rule": "Keep features familiar and abstractions justified by whole-program clarity",
+      "route": "review",
+      "checks": [],
+      "limitation": "Architectural clarity and abstraction value require review.",
+      "evidence": {},
+      "assessment": "none",
+      "verification": "review-required"
+    },
+    {
+      "id": "scope",
+      "source_block": "4a620348-f421-4cc4-97d1-e95b7d86ea41",
+      "rule": "Apply the same restrictions to helpers and boundary adapters; exempt dependencies only",
+      "route": "review",
+      "checks": [],
+      "limitation": "Project-authored headers and a named-module consumer are tested. Source ownership and correct system-header classification remain integration responsibilities; no boundary directory is automatically exempt.",
+      "evidence": {},
+      "assessment": "none",
+      "verification": "review-required"
+    },
+    {
+      "id": "defaults",
+      "source_block": "a5ebfa77-9580-4e4d-a6ee-af54e53a75f5",
+      "rule": "Allow facilities unless explicitly restricted or banned",
+      "route": "review",
+      "checks": [],
+      "limitation": "Do not enable unrelated style rules merely because they exist.",
+      "evidence": {},
+      "assessment": "none",
+      "verification": "review-required"
+    },
+    {
+      "id": "boundary-permissions",
+      "source_block": "b4cf58a4-5c14-4ca3-ac5c-fa0c23e570e5",
+      "rule": "Keep boundary permissions local to the external connection requiring them",
+      "route": "review",
+      "checks": [],
+      "limitation": "Named NOLINT suppressions record a claim; the checker does not validate the reason or grant policy permission.",
+      "evidence": {},
+      "assessment": "none",
+      "verification": "review-required"
+    },
+    {
+      "id": "ownership-style",
+      "source_block": "0c3127f1-1ed4-499f-969e-071524c87cea",
+      "rule": "Prefer values, direct ownership, and RAII",
+      "route": "upstream-partial",
+      "checks": [
+        "bugprone-unused-raii"
+      ],
+      "limitation": "Detects an immediately discarded nontrivial RAII temporary and preserves a named guard. This heuristic skips macros, call-returned objects and the final statement of a block; direct-ownership intent still needs review.",
+      "evidence": {
+        "bugprone-unused-raii": [
+          "tests/integrated/upstream-lifetimes.cpp"
+        ]
+      },
+      "assessment": "mixed",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "borrow-types",
+      "source_block": "53402fe1-663a-4328-84f7-6b6e586290f6",
+      "rule": "Use references for required borrows and raw pointers only for optional borrows",
+      "route": "custom-candidate",
+      "checks": [],
+      "limitation": "Type shape is visible; proving optionality and nonownership is a separate analysis.",
+      "evidence": {},
+      "assessment": "none",
+      "verification": "not-implemented"
+    },
+    {
+      "id": "shared-lifetime",
+      "source_block": "53402fe1-663a-4328-84f7-6b6e586290f6",
+      "rule": "Use shared/weak ownership only with explicit retention policy and no cycles",
+      "route": "review",
+      "checks": [],
+      "limitation": "Find shared_ptr uses, then review retention and cycles.",
+      "evidence": {},
+      "assessment": "none",
+      "verification": "review-required"
+    },
+    {
+      "id": "data-style",
+      "source_block": "576b5f2d-0d63-474c-aeed-d0ea40e649c9",
+      "rule": "Prefer public struct records, scoped enums, and named domain results; allow invariant types",
+      "route": "upstream-partial",
+      "checks": [
+        "cppcoreguidelines-use-enum-class"
+      ],
+      "limitation": "Candidate enum check is not enabled; invariant and domain judgments are contextual.",
+      "evidence": {},
+      "assessment": "syntax",
+      "verification": "not-configured"
+    },
+    {
+      "id": "initialization",
+      "source_block": "576b5f2d-0d63-474c-aeed-d0ea40e649c9",
+      "rule": "Initialize values before use",
+      "route": "upstream-partial",
+      "checks": [
+        "cppcoreguidelines-init-variables",
+        "cppcoreguidelines-pro-type-member-init"
+      ],
+      "limitation": "Candidates are not enabled; compiler uninitialized warnings and analysis provide complementary coverage.",
+      "evidence": {},
+      "assessment": "syntax",
+      "verification": "not-configured"
+    },
+    {
+      "id": "special-members",
+      "source_block": "b8e63506-6a85-4731-9f99-6f0db8ecd95e",
+      "rule": "Use implicit/defaulted special members when correct",
+      "route": "upstream-partial",
+      "checks": [
+        "modernize-use-equals-default"
+      ],
+      "limitation": "Fixture-tested empty default constructor/destructor bodies and preservation of resource cleanup/defaulted members. Other special-member forms are not all exercised; upstream does not support replacing move-member implementations. Ownership design still needs review.",
+      "evidence": {
+        "modernize-use-equals-default": [
+          "tests/integrated/upstream-records.cpp"
+        ]
+      },
+      "assessment": "mixed",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "designated-init",
+      "source_block": "b8e63506-6a85-4731-9f99-6f0db8ecd95e",
+      "rule": "Prefer designated initialization for records; choose intended constructors elsewhere",
+      "route": "upstream-partial",
+      "checks": [
+        "modernize-use-designated-initializers"
+      ],
+      "limitation": "Advisory preference tested for multi-field and single-field records, existing designators, omitted fields, std::array and explicit constructors. Single-field aggregates are explicitly enabled. Macro expansions remain excluded by the upstream default.",
+      "evidence": {
+        "modernize-use-designated-initializers": [
+          "tests/integrated/upstream-records.cpp"
+        ]
+      },
+      "assessment": "review-sites",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "resource-results",
+      "source_block": "13cf8688-8562-4490-8011-b40b76362de6",
+      "rule": "Use expected-returning factories for fallible acquisition and explicit fallible completion",
+      "route": "custom-candidate",
+      "checks": [],
+      "limitation": "Can check named API signatures after identifying resources; cannot infer every fallible operation.",
+      "evidence": {},
+      "assessment": "none",
+      "verification": "not-implemented"
+    },
+    {
+      "id": "destructors",
+      "source_block": "13cf8688-8562-4490-8011-b40b76362de6",
+      "rule": "Keep destructors nonthrowing",
+      "route": "upstream-partial",
+      "checks": [
+        "bugprone-exception-escape"
+      ],
+      "limitation": "Detects visible indirect throws escaping a destructor and preserves cleanup declared noexcept. Absent dependency bodies are not proved safe; explicitly noexcept(false) destructors are excluded upstream and remain a coverage gap.",
+      "evidence": {
+        "bugprone-exception-escape": [
+          "tests/integrated/upstream-exceptions.cpp"
+        ]
+      },
+      "assessment": "syntax",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "global-state",
+      "source_block": "020c9c85-3348-40f6-988e-5b643a1bb7ab",
+      "rule": "Restrict mutable globals and thread_local to runtime/platform needs",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-restricted-globals"
+      ],
+      "limitation": "Reports mutable globals/static-member state and thread_local; purpose and deep immutability remain review.",
+      "evidence": {
+        "narrow-restricted-globals": [
+          "tests/custom/language.cpp"
+        ]
+      },
+      "assessment": "review-sites",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "borrowed-members",
+      "source_block": "c97a116b-d2d2-4c2f-8279-a5d2696d89d1",
+      "rule": "Restrict borrowed members and stored callbacks to explicit owner/lifetime relationships",
+      "route": "review",
+      "checks": [
+        "bugprone-dangling-handle"
+      ],
+      "limitation": "Local dangling diagnostics are partial; relationship and self-referential moves require review.",
+      "evidence": {},
+      "assessment": "none",
+      "verification": "review-required"
+    },
+    {
+      "id": "new-delete",
+      "source_block": "057b224e-baee-492f-be78-93edfdb69776",
+      "rule": "Ban direct new/delete except resource/allocation boundaries",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-no-direct-new-delete",
+        "narrow-restricted-placement-new"
+      ],
+      "limitation": "Direct allocating new/delete are errors; placement construction/functions use an independent warning check. Checks scalar/array and explicit allocation/deallocation functions, including nothrow allocating new. Resource/allocation and storage boundary claims remain local.",
+      "evidence": {
+        "narrow-no-direct-new-delete": [
+          "tests/custom/violations.cpp",
+          "tests/custom/allowed.cpp"
+        ],
+        "narrow-restricted-placement-new": [
+          "tests/custom/violations.cpp",
+          "tests/integrated/restricted.cpp"
+        ]
+      },
+      "assessment": "mixed",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "manual-allocation",
+      "source_block": "057b224e-baee-492f-be78-93edfdb69776",
+      "rule": "Ban raw ownership and manual allocation/free pairs outside boundaries",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-no-direct-new-delete",
+        "narrow-legacy-c-library"
+      ],
+      "limitation": "Checks known APIs, not arbitrary raw-pointer ownership or custom resource APIs.",
+      "evidence": {
+        "narrow-no-direct-new-delete": [
+          "tests/custom/violations.cpp"
+        ],
+        "narrow-legacy-c-library": [
+          "tests/custom/restricted-library.cpp"
+        ]
+      },
+      "assessment": "review-sites",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "borrow-validity",
+      "source_block": "af7ab927-2acd-4aea-a54a-4f69ad722490",
+      "rule": "Keep borrows within valid lifetimes and validate access after invalidation",
+      "route": "upstream-partial",
+      "checks": [
+        "bugprone-dangling-handle",
+        "bugprone-use-after-move",
+        "bugprone-unchecked-optional-access"
+      ],
+      "limitation": "Fixture-tested dangling handles, unchecked optional access and moved-from owner dereferences; reinitialization, disjoint branches and null-state queries are preserved. Upstream falsely flags a null-guarded moved-from unique_ptr dereference; that safe case has a justified local suppression. No general lifetime, bounds or invalidation proof.",
+      "evidence": {
+        "bugprone-dangling-handle": [
+          "tests/integrated/audit-upstream.cpp"
+        ],
+        "bugprone-unchecked-optional-access": [
+          "tests/integrated/audit-upstream.cpp"
+        ],
+        "bugprone-use-after-move": [
+          "tests/integrated/upstream-lifetimes.cpp"
+        ]
+      },
+      "assessment": "mixed",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "auto-bindings",
+      "source_block": "f9665274-5658-4793-845b-c850808a0465",
+      "rule": "Use clear local auto and deliberate references/copies in structured bindings",
+      "route": "review",
+      "checks": [],
+      "limitation": "A type being clear or a domain name useful is not a syntactic property.",
+      "evidence": {},
+      "assessment": "none",
+      "verification": "review-required"
+    },
+    {
+      "id": "lambda-captures",
+      "source_block": "f9665274-5658-4793-845b-c850808a0465",
+      "rule": "Use default reference capture only for synchronous nonescaping lambdas",
+      "route": "custom-candidate",
+      "checks": [],
+      "limitation": "Can find default captures at known scheduling/storage APIs; general escape analysis remains partial.",
+      "evidence": {},
+      "assessment": "none",
+      "verification": "not-implemented"
+    },
+    {
+      "id": "public-signatures",
+      "source_block": "f9665274-5658-4793-845b-c850808a0465",
+      "rule": "Use explicit public signatures except simple generics",
+      "route": "custom-candidate",
+      "checks": [],
+      "limitation": "Needs a definition of public surface and generic exceptions.",
+      "evidence": {},
+      "assessment": "none",
+      "verification": "not-implemented"
+    },
+    {
+      "id": "small-generics",
+      "source_block": "f9665274-5658-4793-845b-c850808a0465",
+      "rule": "Allow simple templates, constexpr, static_assert, constinit, and small consteval operations",
+      "route": "review",
+      "checks": [],
+      "limitation": "No ban on templates or concepts as a class.",
+      "evidence": {},
+      "assessment": "none",
+      "verification": "review-required"
+    },
+    {
+      "id": "callback-kinds",
+      "source_block": "90a28fdc-7ced-4295-a920-31f540b76e4c",
+      "rule": "Select function pointer, function_ref, or move_only_function by callback lifetime",
+      "route": "custom-candidate",
+      "checks": [],
+      "limitation": "Canonical types can be checked; ownership and escape context must be modeled.",
+      "evidence": {},
+      "assessment": "none",
+      "verification": "not-implemented"
+    },
+    {
+      "id": "callback-compat",
+      "source_block": "a246aaeb-36f8-47e1-8f40-94c185b5d3e4",
+      "rule": "Reserve std::function for compatibility and use copyable_function for new copyable interfaces",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-restricted-library"
+      ],
+      "limitation": "Reports std::function for local compatibility justification; callback lifetimes remain unproved.",
+      "evidence": {
+        "narrow-restricted-library": [
+          "tests/custom/restricted-library.cpp"
+        ]
+      },
+      "assessment": "review-sites",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "callback-nonempty",
+      "source_block": "a246aaeb-36f8-47e1-8f40-94c185b5d3e4",
+      "rule": "Ensure owning function wrappers contain a target before invocation",
+      "route": "custom-candidate",
+      "checks": [],
+      "limitation": "Needs path-sensitive state analysis, including dependency calls.",
+      "evidence": {},
+      "assessment": "none",
+      "verification": "not-implemented"
+    },
+    {
+      "id": "constraints",
+      "source_block": "c2d6fcde-ac66-4ba5-9170-a77d304bab30",
+      "rule": "Allow readable concepts, requires, direct type queries, and if constexpr",
+      "route": "review",
+      "checks": [],
+      "limitation": "Keep these permitted when restricting other metaprogramming.",
+      "evidence": {},
+      "assessment": "none",
+      "verification": "review-required"
+    },
+    {
+      "id": "sfinae",
+      "source_block": "7e1c9454-d446-4fb7-a444-fc88b0552012",
+      "rule": "Ban enable_if, SFINAE, and detection idioms/frameworks",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-no-sfinae"
+      ],
+      "limitation": "Checks standard enable_if and recognized experimental detection facilities, including aliases and dependent references; arbitrary user SFINAE remains a gap.",
+      "evidence": {
+        "narrow-no-sfinae": [
+          "tests/custom/generics.cpp"
+        ]
+      },
+      "assessment": "mixed",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "template-frameworks",
+      "source_block": "7e1c9454-d446-4fb7-a444-fc88b0552012",
+      "rule": "Ban recursive type computation, type-list/dispatch/expression frameworks, CRTP, and DSLs",
+      "route": "custom-candidate",
+      "checks": [],
+      "limitation": "CRTP has structural clues; framework/design classification remains partly review.",
+      "evidence": {},
+      "assessment": "none",
+      "verification": "not-implemented"
+    },
+    {
+      "id": "adapter-generics",
+      "source_block": "ec31efd1-43cf-46ea-bed8-e6b33ba20c75",
+      "rule": "Restrict variadics, forwarding, guides, decltype(auto), explicit object parameters, and specialization",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-restricted-generics"
+      ],
+      "limitation": "Checks packs, forwarding references including generic lambdas, forward/forward_like calls, guides, decltype(auto), explicit object parameters and specialization/instantiation. Dependent formatter/hash exceptions are supported; adapter purpose remains review.",
+      "evidence": {
+        "narrow-restricted-generics": [
+          "tests/custom/generics.cpp",
+          "tests/custom/audit-language.cpp",
+          "tests/custom/audit-formatter.cpp"
+        ]
+      },
+      "assessment": "review-sites",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "interface-inheritance",
+      "source_block": "6ad01641-204b-4a5b-90aa-5a6a2bfdd72c",
+      "rule": "Allow one public data-free pure-virtual interface base with virtual destructor, override, normally final",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-inheritance",
+        "modernize-use-override",
+        "cppcoreguidelines-virtual-class-destructor",
+        "narrow-no-complex-inheritance"
+      ],
+      "limitation": "Tests interface shape, formatter reuse, missing override and public nonvirtual destructors. Config preserves override final and virtual override. Upstream accepts final alone as an override marker, and protected nonvirtual destructors; these do not by themselves establish Narrow interface compliance. External adapters/dependent bases need review; final remains a preference.",
+      "evidence": {
+        "narrow-inheritance": [
+          "tests/custom/inheritance.cpp",
+          "tests/custom/formatter.cpp",
+          "tests/custom/audit-formatter.cpp"
+        ],
+        "modernize-use-override": [
+          "tests/integrated/upstream-type-behavior.cpp"
+        ],
+        "cppcoreguidelines-virtual-class-destructor": [
+          "tests/integrated/upstream-type-behavior.cpp"
+        ],
+        "narrow-no-complex-inheritance": [
+          "tests/custom/inheritance.cpp"
+        ]
+      },
+      "assessment": "mixed",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "complex-inheritance",
+      "source_block": "6ad01641-204b-4a5b-90aa-5a6a2bfdd72c",
+      "rule": "Ban multiple/virtual inheritance and implementation inheritance except stated adapters",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-inheritance",
+        "narrow-no-complex-inheritance"
+      ],
+      "limitation": "Multiple and virtual inheritance are errors. Other implementation/unresolved-dependent inheritance requests external-interface justification as a warning; the checker cannot establish architectural need.",
+      "evidence": {
+        "narrow-inheritance": [
+          "tests/custom/inheritance.cpp"
+        ],
+        "narrow-no-complex-inheritance": [
+          "tests/custom/inheritance.cpp"
+        ]
+      },
+      "assessment": "mixed",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "operator-meaning",
+      "source_block": "6ad01641-204b-4a5b-90aa-5a6a2bfdd72c",
+      "rule": "Restrict operators to conventional meaningful operations and appropriate default comparisons",
+      "route": "review",
+      "checks": [],
+      "limitation": "An operator allowlist is possible; meaningful semantics require review.",
+      "evidence": {},
+      "assessment": "none",
+      "verification": "review-required"
+    },
+    {
+      "id": "logical-comma",
+      "source_block": "6ad01641-204b-4a5b-90aa-5a6a2bfdd72c",
+      "rule": "Ban overloaded logical and comma operators",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-no-logical-comma-overload"
+      ],
+      "limitation": "Checks logical and comma declarations, including logical negation; arbitrary pipeline/control-flow DSLs remain review.",
+      "evidence": {
+        "narrow-no-logical-comma-overload": [
+          "tests/custom/violations.cpp"
+        ]
+      },
+      "assessment": "syntax",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "explicit-conversions",
+      "source_block": "6ad01641-204b-4a5b-90aa-5a6a2bfdd72c",
+      "rule": "Require explicit converting constructors/operators except copy/move",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-explicit-conversions"
+      ],
+      "limitation": "Checks parameterized constructors and conversion operators, preserving normal copy/move and zero-parameter constructors; meaning remains review.",
+      "evidence": {
+        "narrow-explicit-conversions": [
+          "tests/custom/language.cpp"
+        ]
+      },
+      "assessment": "mixed",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "unions",
+      "source_block": "6ad01641-204b-4a5b-90aa-5a6a2bfdd72c",
+      "rule": "Restrict raw unions to named low-level/interoperability boundaries",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-restricted-unions"
+      ],
+      "limitation": "Checks forward declarations and named/anonymous definitions; does not inspect every use of an already declared union. Qualifying boundary permission is local.",
+      "evidence": {
+        "narrow-restricted-unions": [
+          "tests/custom/language.cpp",
+          "tests/custom/audit-language.cpp"
+        ]
+      },
+      "assessment": "review-sites",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "representation",
+      "source_block": "6ad01641-204b-4a5b-90aa-5a6a2bfdd72c",
+      "rule": "Restrict casts, placement construction, bytes, and layout attributes to justified low-level boundaries",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-restricted-low-level",
+        "narrow-restricted-library",
+        "narrow-legacy-c-library",
+        "narrow-no-direct-new-delete",
+        "cppcoreguidelines-pro-type-const-cast",
+        "cppcoreguidelines-pro-type-reinterpret-cast",
+        "narrow-restricted-placement-new"
+      ],
+      "limitation": "Tests layout/restrict forms, byte/lifetime APIs, placement new, reinterpret_cast, and qualifier-adding/removing const_cast. StrictMode explicitly covers every const_cast. Local representation-boundary suppression is tested; alignment/aliasing/lifetime proofs and layout pragmas remain gaps.",
+      "evidence": {
+        "narrow-restricted-low-level": [
+          "tests/custom/low-level.cpp"
+        ],
+        "narrow-restricted-library": [
+          "tests/custom/restricted-library.cpp"
+        ],
+        "narrow-legacy-c-library": [
+          "tests/custom/restricted-library.cpp"
+        ],
+        "narrow-no-direct-new-delete": [
+          "tests/custom/violations.cpp"
+        ],
+        "cppcoreguidelines-pro-type-const-cast": [
+          "tests/integrated/upstream-type-behavior.cpp"
+        ],
+        "cppcoreguidelines-pro-type-reinterpret-cast": [
+          "tests/integrated/upstream-type-behavior.cpp"
+        ],
+        "narrow-restricted-placement-new": [
+          "tests/custom/violations.cpp",
+          "tests/integrated/restricted.cpp"
+        ]
+      },
+      "assessment": "review-sites",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "cstyle-casts",
+      "source_block": "6ad01641-204b-4a5b-90aa-5a6a2bfdd72c",
+      "rule": "Ban C-style casts",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-no-c-style-casts"
+      ],
+      "limitation": "Checks CStyleCastExpr, including numeric and void casts and macros.",
+      "evidence": {
+        "narrow-no-c-style-casts": [
+          "tests/custom/violations.cpp"
+        ]
+      },
+      "assessment": "syntax",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "downcasts",
+      "source_block": "6ad01641-204b-4a5b-90aa-5a6a2bfdd72c",
+      "rule": "Ban unchecked downcasts",
+      "route": "upstream-partial",
+      "checks": [
+        "cppcoreguidelines-pro-type-static-cast-downcast"
+      ],
+      "limitation": "Tests pointer/reference downcasts while preserving upcasts and numeric casts. The warning cannot verify a project validity proof. Its proposed dynamic_cast fix violates Narrow RTTI rules: do not apply that fix automatically.",
+      "evidence": {
+        "cppcoreguidelines-pro-type-static-cast-downcast": [
+          "tests/integrated/upstream-type-behavior.cpp"
+        ]
+      },
+      "assessment": "review-sites",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "narrowing",
+      "source_block": "6ad01641-204b-4a5b-90aa-5a6a2bfdd72c",
+      "rule": "Ban unchecked narrowing; allow casts when value already known to fit",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-known-narrowing",
+        "bugprone-narrowing-conversions"
+      ],
+      "limitation": "Upstream checks implicit conversions; the custom check rejects provably out-of-range integral static_cast operands. Known-fit constants and guarded runtime casts remain allowed. No general runtime range proof, floating/enum explicit-cast coverage, or dependent constant analysis.",
+      "evidence": {
+        "narrow-known-narrowing": [
+          "tests/integrated/audit-upstream.cpp"
+        ],
+        "bugprone-narrowing-conversions": [
+          "tests/integrated/policy.cpp"
+        ]
+      },
+      "assessment": "mixed",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "pointer-arithmetic",
+      "source_block": "6ad01641-204b-4a5b-90aa-5a6a2bfdd72c",
+      "rule": "Ban raw pointer arithmetic",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-no-pointer-arithmetic"
+      ],
+      "limitation": "Checks raw pointer addition/subtraction, compound assignment, increments/decrements and indexing, including project template instantiations. Direct C-array indexing and bounded-view operations are preserved; their bounds are not proved.",
+      "evidence": {
+        "narrow-no-pointer-arithmetic": [
+          "tests/custom/audit-pointer.cpp",
+          "tests/integrated/audit-upstream.cpp"
+        ]
+      },
+      "assessment": "syntax",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "extensions",
+      "source_block": "6ad01641-204b-4a5b-90aa-5a6a2bfdd72c",
+      "rule": "Ban computed goto, VLAs, GNU statement expressions",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-no-extensions"
+      ],
+      "limitation": "Checks GNU statements, indirect goto/label addresses and VLA type spellings, including aliases and sizeof type operands. Not a complete audit of all compiler extensions; parse failures never count as enforcement.",
+      "evidence": {
+        "narrow-no-extensions": [
+          "tests/custom/language.cpp",
+          "tests/custom/audit-language.cpp"
+        ]
+      },
+      "assessment": "syntax",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "error-results",
+      "source_block": "419bbbe5-3964-49ce-9098-59e5de43a7d2",
+      "rule": "Use optional for absence, expected for ordinary failure, and nodiscard on fallible APIs",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-expected-usage"
+      ],
+      "limitation": "Requires nodiscard on by-value expected APIs, including dependent aliases and deduced instantiated template returns. Choosing optional/expected and identifying every fallible project API remain review.",
+      "evidence": {
+        "narrow-expected-usage": [
+          "tests/custom/language.cpp",
+          "tests/custom/audit-language.cpp"
+        ]
+      },
+      "assessment": "mixed",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "error-access",
+      "source_block": "1a7b6448-37ba-4e7d-b6ae-c3adbf0f1af9",
+      "rule": "Check before value access; avoid expected::value for ordinary propagation",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-expected-usage",
+        "bugprone-unchecked-optional-access"
+      ],
+      "limitation": "Reports evaluated expected::value calls, including resolved dependent calls, for local justification; decltype/sizeof/noexcept/requires queries are preserved. Ordinary-propagation classification and expected dereference validity are not proved. Optional access assistance is fixture-tested.",
+      "evidence": {
+        "narrow-expected-usage": [
+          "tests/custom/language.cpp",
+          "tests/custom/audit-language.cpp"
+        ],
+        "bugprone-unchecked-optional-access": [
+          "tests/integrated/audit-upstream.cpp"
+        ]
+      },
+      "assessment": "review-sites",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "error-composition",
+      "source_block": "1a7b6448-37ba-4e7d-b6ae-c3adbf0f1af9",
+      "rule": "Ban error-propagation macros and long combinator chains",
+      "route": "custom-candidate",
+      "checks": [],
+      "limitation": "Preprocessor callbacks plus method-chain analysis; 'long' needs a threshold agreed with policy.",
+      "evidence": {},
+      "assessment": "none",
+      "verification": "not-implemented"
+    },
+    {
+      "id": "exceptions-enabled",
+      "source_block": "9a92bbf2-f6f2-4768-887a-209d1a552db1",
+      "rule": "Keep exceptions enabled; no -fno-exceptions",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-exceptions-enabled"
+      ],
+      "limitation": "Reports translation units parsed with exceptions disabled; tested with -fno-exceptions.",
+      "evidence": {
+        "narrow-exceptions-enabled": [
+          "tests/custom/exceptions-disabled.cpp",
+          "tests/integrated/exceptions-disabled.cpp"
+        ]
+      },
+      "assessment": "syntax",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "throw-catch",
+      "source_block": "9a92bbf2-f6f2-4768-887a-209d1a552db1",
+      "rule": "Restrict throw, project exception classes, and catches with formatter/test/boundary exceptions",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-restricted-exceptions",
+        "narrow-no-application-throw"
+      ],
+      "limitation": "Checks throw and try/catch sites. Permits format_error throws only in parse/format members of formatter specializations for project types, not arbitrary helper members. Other permissions and project exception-class intent remain review. Application throw sites have a separate error diagnostic; catch boundaries remain warnings.",
+      "evidence": {
+        "narrow-restricted-exceptions": [
+          "tests/custom/language.cpp",
+          "tests/custom/formatter.cpp",
+          "tests/custom/audit-formatter.cpp"
+        ],
+        "narrow-no-application-throw": [
+          "tests/custom/language.cpp",
+          "tests/custom/formatter.cpp",
+          "tests/custom/audit-formatter.cpp"
+        ]
+      },
+      "assessment": "review-sites",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "noexcept",
+      "source_block": "c28137e9-7538-4257-b9c0-6190d5d5b3ad",
+      "rule": "Use noexcept only with justified complete behavior or intentional termination",
+      "route": "upstream-partial",
+      "checks": [
+        "bugprone-exception-escape"
+      ],
+      "limitation": "Tests visible exception escape, noexcept cleanup and a defined catch boundary. Intentional termination is policy-permitted and uses a justified local suppression. Absent dependency bodies are not analyzed by default; noexcept alone is not safety.",
+      "evidence": {
+        "bugprone-exception-escape": [
+          "tests/integrated/upstream-exceptions.cpp"
+        ]
+      },
+      "assessment": "review-sites",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "failure-state",
+      "source_block": "e42ff119-4ede-48a6-a1d9-bc337267472d",
+      "rule": "Preserve invariants, stage changes, report failures honestly, choose coarse allocation policy",
+      "route": "review",
+      "checks": [],
+      "limitation": "Requires operation-level reasoning and failure testing.",
+      "evidence": {},
+      "assessment": "none",
+      "verification": "review-required"
+    },
+    {
+      "id": "contracts",
+      "source_block": "ca701964-28f9-4744-bf93-795edc177753",
+      "rule": "Use supported contracts for internal obligations with pure, deterministic, nonthrowing predicates",
+      "route": "custom-candidate",
+      "checks": [],
+      "limitation": "Toolchain-specific AST support, effect analysis, and contract mode validation required; external input remains ordinary errors.",
+      "evidence": {},
+      "assessment": "none",
+      "verification": "not-implemented"
+    },
+    {
+      "id": "module-style",
+      "source_block": "e7485c76-03be-4a9d-9179-1b15a9505de0",
+      "rule": "Prefer coherent named modules while permitting headers for toolchain/dependency needs",
+      "route": "review",
+      "checks": [],
+      "limitation": "Module-per-class and partition-tree design are architectural.",
+      "evidence": {},
+      "assessment": "none",
+      "verification": "review-required"
+    },
+    {
+      "id": "std-import",
+      "source_block": "b28d0367-b20f-4d96-896e-9d78370372a5",
+      "rule": "Use import std where supported; put C/OS/macro headers in appropriate boundary units",
+      "route": "build",
+      "checks": [],
+      "limitation": "Probe compiler/library/BMI integration separately; header include bans do not classify imported symbols.",
+      "evidence": {},
+      "assessment": "none",
+      "verification": "partial-toolchain"
+    },
+    {
+      "id": "macros",
+      "source_block": "b42f8513-c32b-4184-8a42-d1e29c03c4cf",
+      "rule": "Ban application function-like macros and restrict conditional compilation",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-restricted-preprocessor",
+        "narrow-no-function-macros"
+      ],
+      "limitation": "Checks active function-like macro definitions and conditional directives, including skipped conditional directives. Preserves comment-bearing compiler-recognized guards, but not nested reuse of a guard name. Inactive definitions, inactive C++ bodies and cross-TU public-type consistency are not checked; other configurations require relevant build coverage. Qualifying purpose remains review. Function-like macros have a separate error diagnostic; conditional compilation remains a warning.",
+      "evidence": {
+        "narrow-restricted-preprocessor": [
+          "tests/custom/preprocessor.cpp",
+          "tests/custom/audit-preprocessor.cpp",
+          "tests/custom/audit-guards.hpp",
+          "tests/custom/audit-comment-guard.hpp"
+        ],
+        "narrow-no-function-macros": [
+          "tests/custom/preprocessor.cpp",
+          "tests/integrated/banned.cpp"
+        ]
+      },
+      "assessment": "review-sites",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "annotations",
+      "source_block": "5230f419-e1e6-41f9-a3e5-0d3c352edad6",
+      "rule": "Keep lifetime/lock annotations accurate and obey lifetimebound semantics",
+      "route": "build",
+      "checks": [],
+      "limitation": "Thread-safety diagnostics and lifetime diagnostics assist; annotation truth requires review.",
+      "evidence": {},
+      "assessment": "none",
+      "verification": "partial-toolchain"
+    },
+    {
+      "id": "effects",
+      "source_block": "5230f419-e1e6-41f9-a3e5-0d3c352edad6",
+      "rule": "Restrict nonallocating/nonblocking annotations to their full effect contracts",
+      "route": "build",
+      "checks": [],
+      "limitation": "Use compiler effect diagnostics where supported; neither implies noexcept.",
+      "evidence": {},
+      "assessment": "none",
+      "verification": "partial-toolchain"
+    },
+    {
+      "id": "intrinsics",
+      "source_block": "5230f419-e1e6-41f9-a3e5-0d3c352edad6",
+      "rule": "Restrict intrinsics, overflow builtins, restrict qualifiers, and special layout",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-restricted-low-level"
+      ],
+      "limitation": "Checks selected callable builtins, builtin_bit_cast, common x86 intrinsic families, layout attributes and restrict. Other non-call builtin AST forms, platform intrinsics and layout pragmas remain gaps; need/performance evidence requires review.",
+      "evidence": {
+        "narrow-restricted-low-level": [
+          "tests/custom/low-level.cpp"
+        ]
+      },
+      "assessment": "review-sites",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "assumptions",
+      "source_block": "5230f419-e1e6-41f9-a3e5-0d3c352edad6",
+      "rule": "Ban assume attributes, __builtin_assume, and std::unreachable in application code",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-no-assumptions"
+      ],
+      "limitation": "Checks assume attributes, builtin assume/unreachable, and std::unreachable.",
+      "evidence": {
+        "narrow-no-assumptions": [
+          "tests/custom/language.cpp",
+          "tests/custom/low-level.cpp"
+        ]
+      },
+      "assessment": "syntax",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "facility-scope",
+      "source_block": "d1ba795b-5412-469f-b04f-9ee1a3d7b5b5",
+      "rule": "Classify facilities rather than header names",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-excluded-library",
+        "narrow-restricted-library",
+        "narrow-no-sfinae"
+      ],
+      "limitation": "Resolves aliases, recursive nested/pointer types, value references, direct/indirect/callable results, selected project template instantiations and a named-module alias. General dependent lookup and full import-std integration remain gaps.",
+      "evidence": {
+        "narrow-excluded-library": [
+          "tests/custom/library.cpp",
+          "tests/custom/audit-library.cpp",
+          "tests/modules/consumer.cpp"
+        ],
+        "narrow-restricted-library": [
+          "tests/custom/restricted-library.cpp"
+        ],
+        "narrow-no-sfinae": [
+          "tests/custom/generics.cpp"
+        ]
+      },
+      "assessment": "mixed",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "numeric-containers",
+      "source_block": "ec0edf59-fbfb-4338-b7b8-d966d32e323e",
+      "rule": "Use fixed-width types when representation matters; choose containers by semantics; name domain results",
+      "route": "review",
+      "checks": [],
+      "limitation": "Representation, invalidation requirements, and domain meaning are contextual.",
+      "evidence": {},
+      "assessment": "none",
+      "verification": "review-required"
+    },
+    {
+      "id": "io-filesystem",
+      "source_block": "154df456-adb6-4b15-a010-90901c15b4d6",
+      "rule": "Use explicit parsing, one formatting style, explicit filesystem errors",
+      "route": "custom-candidate",
+      "checks": [],
+      "limitation": "Can target selected overloads and project formatting APIs; policy needs concrete API names.",
+      "evidence": {},
+      "assessment": "none",
+      "verification": "not-implemented"
+    },
+    {
+      "id": "existing-facilities",
+      "source_block": "de033589-101e-425d-83fd-58af255fce32",
+      "rule": "Prefer an existing facility that fits the rules",
+      "route": "review",
+      "checks": [],
+      "limitation": "The checker does not choose between suitable libraries or justify new wrappers.",
+      "evidence": {},
+      "assessment": "none",
+      "verification": "review-required"
+    },
+    {
+      "id": "linked-containers",
+      "source_block": "fac2f192-5289-4db4-b041-dcffafc1ae8f",
+      "rule": "Restrict list/forward_list/hive to concrete operation or stability needs",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-restricted-library"
+      ],
+      "limitation": "list/forward_list uses are fixture-tested. hive recognition is implementation-only until a supported header is available; operation/stability need remains review.",
+      "evidence": {
+        "narrow-restricted-library": [
+          "tests/custom/audit-library.cpp"
+        ]
+      },
+      "assessment": "review-sites",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "tuple",
+      "source_block": "fac2f192-5289-4db4-b041-dcffafc1ae8f",
+      "rule": "Restrict tuple to adapters/existing APIs",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-restricted-library"
+      ],
+      "limitation": "Reports tuple/make_tuple/tie; generic-adapter purpose remains review.",
+      "evidence": {
+        "narrow-restricted-library": [
+          "tests/custom/restricted-library.cpp"
+        ]
+      },
+      "assessment": "review-sites",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "allocator-facilities",
+      "source_block": "fac2f192-5289-4db4-b041-dcffafc1ae8f",
+      "rule": "Restrict memory_resource, scoped_allocator, low-level allocation and handlers",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-restricted-library",
+        "narrow-no-direct-new-delete"
+      ],
+      "limitation": "Checks pmr/scoped allocator facilities and selected allocation/lifetime APIs; custom allocator frameworks remain review.",
+      "evidence": {
+        "narrow-restricted-library": [
+          "tests/custom/restricted-library.cpp"
+        ],
+        "narrow-no-direct-new-delete": [
+          "tests/custom/violations.cpp"
+        ]
+      },
+      "assessment": "review-sites",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "numerical",
+      "source_block": "fac2f192-5289-4db4-b041-dcffafc1ae8f",
+      "rule": "Restrict mdspan/linalg to numerical code with explicit layout and result storage",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-restricted-library"
+      ],
+      "limitation": "mdspan use sites are fixture-tested. linalg recognition is implementation-only until a supported header is available; layout/result-storage purpose remains review.",
+      "evidence": {
+        "narrow-restricted-library": [
+          "tests/custom/audit-library.cpp"
+        ]
+      },
+      "assessment": "review-sites",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "fp-environment",
+      "source_block": "fac2f192-5289-4db4-b041-dcffafc1ae8f",
+      "rule": "Restrict floating-point environment changes to subsystem policy",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-legacy-c-library"
+      ],
+      "limitation": "Checks six mutating cfenv APIs through global C declarations, std imports and std-owned declarations, with one legacy-C diagnostic family. Local boundary permissions are preserved; subsystem policy remains review.",
+      "evidence": {
+        "narrow-legacy-c-library": [
+          "tests/custom/audit-library.cpp",
+          "tests/custom/c-library-identity.cpp"
+        ]
+      },
+      "assessment": "review-sites",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "weak-memory",
+      "source_block": "fac2f192-5289-4db4-b041-dcffafc1ae8f",
+      "rule": "Restrict custom weak-memory and lock-free machinery to synchronization boundaries",
+      "route": "custom-candidate",
+      "checks": [],
+      "limitation": "Memory-order arguments visible; protocol correctness requires specialist review.",
+      "evidence": {},
+      "assessment": "none",
+      "verification": "not-implemented"
+    },
+    {
+      "id": "diagnostics",
+      "source_block": "fac2f192-5289-4db4-b041-dcffafc1ae8f",
+      "rule": "Restrict exception/contract/assert/stacktrace/debug facilities; no release checks relying on assert",
+      "route": "custom-candidate",
+      "checks": [],
+      "limitation": "Canonical symbols and PP callbacks; tests and diagnostics remain allowed.",
+      "evidence": {},
+      "assessment": "review-sites",
+      "verification": "not-implemented"
+    },
+    {
+      "id": "streams",
+      "source_block": "fac2f192-5289-4db4-b041-dcffafc1ae8f",
+      "rule": "Restrict stream use to existing interfaces or subsystem needs",
+      "route": "review",
+      "checks": [],
+      "limitation": "No default blanket stream ban; identify permitted interfaces.",
+      "evidence": {},
+      "assessment": "none",
+      "verification": "review-required"
+    },
+    {
+      "id": "valarray",
+      "source_block": "fac2f192-5289-4db4-b041-dcffafc1ae8f",
+      "rule": "Require a stated need for valarray",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-restricted-library"
+      ],
+      "limitation": "Reports valarray use sites for stated numerical need.",
+      "evidence": {
+        "narrow-restricted-library": [
+          "tests/custom/audit-library.cpp"
+        ]
+      },
+      "assessment": "review-sites",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "locale",
+      "source_block": "fac2f192-5289-4db4-b041-dcffafc1ae8f",
+      "rule": "Restrict global locale mutation to initialization/locale boundaries",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-restricted-library",
+        "narrow-legacy-c-library"
+      ],
+      "limitation": "Checks locale::global and mutating setlocale. Constant-evaluated null-pointer queries are preserved, including casts and constexpr pointers; purpose remains review. locale::global has no dedicated fixture.",
+      "evidence": {
+        "narrow-legacy-c-library": [
+          "tests/custom/restricted-library.cpp",
+          "tests/custom/audit-library.cpp"
+        ]
+      },
+      "assessment": "review-sites",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "legacy-c",
+      "source_block": "fac2f192-5289-4db4-b041-dcffafc1ae8f",
+      "rule": "Restrict raw C allocation and ban unchecked copies, rand, C sorting callbacks",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-legacy-c-library",
+        "narrow-no-unsafe-c-library"
+      ],
+      "limitation": "Checks known allocation/byte APIs through global C declarations, std imports and std-owned declarations, unsafe copies, rand/srand, C sorting callbacks and nonlocal jumps. Recognizes libc redeclarations; same-named project functions, bsearch, abs/div and null locale queries remain permitted. Not every listed API has a fixture. Unsafe legacy operations and nonlocal jumps are errors; raw C allocation/byte operations and locale mutation remain warnings.",
+      "evidence": {
+        "narrow-legacy-c-library": [
+          "tests/custom/restricted-library.cpp",
+          "tests/custom/audit-library.cpp",
+          "tests/custom/c-library-identity.cpp"
+        ],
+        "narrow-no-unsafe-c-library": [
+          "tests/custom/restricted-library.cpp",
+          "tests/custom/audit-library.cpp",
+          "tests/integrated/mixed.cpp"
+        ]
+      },
+      "assessment": "review-sites",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "compatibility-exceptions",
+      "source_block": "1f824689-f99b-4e57-a74c-cb64812f6287",
+      "rule": "Limit excluded facilities at necessary compatibility boundaries to the required part",
+      "route": "review",
+      "checks": [],
+      "limitation": "Dependency implementation is filtered as system source; project compatibility purpose and source ownership require review.",
+      "evidence": {},
+      "assessment": "none",
+      "verification": "review-required"
+    },
+    {
+      "id": "rtti-syntax",
+      "source_block": "ca824013-a635-460f-8777-6cf6544f705b",
+      "rule": "Ban dynamic_cast and typeid outside necessary compatibility boundaries",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-no-rtti"
+      ],
+      "limitation": "Checks dynamic_cast/typeid expressions with RTTI enabled; does not require -fno-rtti.",
+      "evidence": {
+        "narrow-no-rtti": [
+          "tests/custom/violations.cpp"
+        ]
+      },
+      "assessment": "syntax",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "dynamic-values",
+      "source_block": "ca824013-a635-460f-8777-6cf6544f705b",
+      "rule": "Ban any, type_index, and runtime type registries",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-excluded-library"
+      ],
+      "limitation": "Checks any/any_cast/make_any/type_info/type_index; registry design remains review.",
+      "evidence": {
+        "narrow-excluded-library": [
+          "tests/custom/library.cpp",
+          "tests/custom/violations.cpp"
+        ]
+      },
+      "assessment": "syntax",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "std-tasks",
+      "source_block": "ca824013-a635-460f-8777-6cf6544f705b",
+      "rule": "Ban async, futures/promises, packaged tasks, execution policies, senders/receivers, std execution tasks",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-excluded-library"
+      ],
+      "limitation": "Checks recognized future/promise/async/task types and execution facilities, including libstdc++ PSTL identities; architecture remains review.",
+      "evidence": {
+        "narrow-excluded-library": [
+          "tests/custom/library.cpp"
+        ]
+      },
+      "assessment": "mixed",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "coroutines",
+      "source_block": "ca824013-a635-460f-8777-6cf6544f705b",
+      "rule": "Ban application coroutines and generator machinery",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-no-coroutines",
+        "narrow-excluded-library"
+      ],
+      "limitation": "Checks spelled coroutine keywords and recognized standard machinery, skipping generated internals; generator availability varies.",
+      "evidence": {
+        "narrow-no-coroutines": [
+          "tests/custom/coroutines.cpp"
+        ],
+        "narrow-excluded-library": [
+          "tests/custom/coroutines.cpp"
+        ]
+      },
+      "assessment": "mixed",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "lazy-ranges",
+      "source_block": "ca824013-a635-460f-8777-6cf6544f705b",
+      "rule": "Ban lazy adaptors/pipelines/frameworks; allow passive views and eager algorithms",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-excluded-library"
+      ],
+      "limitation": "Checks recognized adaptors/lazy view types; preserves passive all/ref_view/subrange and eager algorithms. Custom frameworks remain review.",
+      "evidence": {
+        "narrow-excluded-library": [
+          "tests/custom/library.cpp"
+        ]
+      },
+      "assessment": "mixed",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "reflection",
+      "source_block": "ca824013-a635-460f-8777-6cf6544f705b",
+      "rule": "Ban application reflection/expansion generation except reviewed codegen utilities",
+      "route": "custom-candidate",
+      "checks": [],
+      "limitation": "Depends on compiler C++26 AST coverage; utility permission remains local.",
+      "evidence": {},
+      "assessment": "none",
+      "verification": "not-implemented"
+    },
+    {
+      "id": "c-adapters",
+      "source_block": "ca824013-a635-460f-8777-6cf6544f705b",
+      "rule": "Restrict setjmp/longjmp and C varargs to required C adapters",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-restricted-c-varargs",
+        "narrow-no-unsafe-c-library"
+      ],
+      "limitation": "Checks variadic function types/declarations, direct/member/indirect calls, builtin library varargs, va_list, va_arg and selected va_* builtins. Preserves compiler pseudo-variadic intrinsics. Public glibc setjmp macro calls are diagnosed at the expansion site; required C-adapter purpose remains review.",
+      "evidence": {
+        "narrow-restricted-c-varargs": [
+          "tests/custom/audit-language.cpp",
+          "tests/custom/language.cpp"
+        ],
+        "narrow-no-unsafe-c-library": [
+          "tests/custom/audit-library.cpp",
+          "tests/integrated/mixed.cpp"
+        ]
+      },
+      "assessment": "review-sites",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "reclamation",
+      "source_block": "ca824013-a635-460f-8777-6cf6544f705b",
+      "rule": "Restrict hazard pointer/RCU implementations to synchronization boundaries",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-excluded-library"
+      ],
+      "limitation": "Name recognition only: no actual hazard-pointer/RCU header fixture on this toolchain. Synchronization protocols and permitted boundary purpose remain unverified.",
+      "evidence": {},
+      "assessment": "review-sites",
+      "verification": "implementation-only"
+    },
+    {
+      "id": "other-symbols",
+      "source_block": "ca824013-a635-460f-8777-6cf6544f705b",
+      "rule": "Ban vector<bool>, bind, placeholders, custom allocator policy families",
+      "route": "custom-partial",
+      "checks": [
+        "narrow-excluded-library"
+      ],
+      "limitation": "Checks vector<bool>, bind and placeholders through aliases/references; allocator-family design remains review.",
+      "evidence": {
+        "narrow-excluded-library": [
+          "tests/custom/library.cpp",
+          "tests/custom/audit-library.cpp"
+        ]
+      },
+      "assessment": "mixed",
+      "verification": "fixture-tested"
+    },
+    {
+      "id": "one-scheduler",
+      "source_block": "47880f3c-2337-4d45-b5a4-6616b78cd694",
+      "rule": "Use one enkiTS scheduler; avoid default task/executor frameworks; allow ordinary threads",
+      "route": "review",
+      "checks": [],
+      "limitation": "Scheduler count and architectural duplication need whole-program knowledge.",
+      "evidence": {},
+      "assessment": "none",
+      "verification": "review-required"
+    },
+    {
+      "id": "enki-surface",
+      "source_block": "b5a206cb-4955-48da-8823-c55c7611dc50",
+      "rule": "Prefer finite batches, range tasks, TaskSet or a final ITaskSet adapter",
+      "route": "custom-candidate",
+      "checks": [],
+      "limitation": "Can inspect named APIs and adapter shape; do not reject compatibility std::function storage.",
+      "evidence": {},
+      "assessment": "none",
+      "verification": "not-implemented"
+    },
+    {
+      "id": "task-exceptions",
+      "source_block": "d4a9ede2-324e-4e9c-92fc-525879cf1087",
+      "rule": "No exception may escape a task callback",
+      "route": "upstream-partial",
+      "checks": [
+        "bugprone-exception-escape"
+      ],
+      "limitation": "The enabled exception-escape check now has ordinary noexcept/destructor fixtures, but no enkiTS callback names/model configured and no task fixture. This row remains not-configured; general scheduled-callable/dependency containment is not established.",
+      "evidence": {},
+      "assessment": "syntax",
+      "verification": "not-configured"
+    },
+    {
+      "id": "enki-advanced",
+      "source_block": "9e886d29-cf35-47d0-b261-b0cf3b6cb767",
+      "rule": "Restrict pinned tasks, graphs, priorities, custom scheduler allocation to concrete needs",
+      "route": "review",
+      "checks": [],
+      "limitation": "Use-site reports can direct review; concrete need is not inferable.",
+      "evidence": {},
+      "assessment": "none",
+      "verification": "review-required"
+    }
+  ],
+  "context_blocks": {
+    "817e132e-1f49-48ad-8da5-811a9f38e43c": "Revision metadata",
+    "2f5fb932-6f5e-4eac-84d4-62059fdf5800": "Heading",
+    "bacd9b27-3d5e-4e87-a158-44ed1d80b1f7": "Status definitions used throughout the inventory",
+    "3ecdf68a-a855-41b3-b937-9dc6adb71eea": "Empty block",
+    "a19b7235-6e2d-4bc8-863d-06b3e8f8da12": "Heading",
+    "d0d3b5e9-bd7c-42d8-9a28-bd984652fdba": "Illustrative designated-initialization example",
+    "c4bf2e87-c5e8-4f0b-9f15-c8bd61486fdf": "Heading",
+    "236cad9f-762e-45f7-9cd6-a998ee876b62": "Heading",
+    "c88aa8e6-b6fd-485b-bb45-58e28f982849": "Heading",
+    "2467d245-e7b3-48b0-9beb-10ffa734f5ea": "Heading",
+    "657e8ece-f5a3-4b2c-8262-f01f9a8cc218": "Heading",
+    "fea21f90-f92e-43b3-83a2-33b359a91179": "Heading",
+    "1a0c8390-8b60-4310-b327-56013af7ca17": "Heading",
+    "31a601fa-8c96-4307-877c-3b98d5493c6a": "Heading",
+    "63fc0f73-9b5b-4763-ae4a-441f01a14fd5": "Heading",
+    "a75e7354-4421-432a-88cc-58063522d823": "Heading"
+  }
+}

@@ -1,0 +1,351 @@
+{
+  "page_id": "page_2f5d2d07e91881918fead050bc559959",
+  "title": "Narrow C++",
+  "url": "https://chatgpt.com/space/page_2f5d2d07e91881918fead050bc559959",
+  "sequence": 11,
+  "retrieved": "2026-10-15",
+  "blocks": [
+    {
+      "id": "817e132e-1f49-48ad-8da5-811a9f38e43c",
+      "kind": "markdown",
+      "hash": "0fdc3d49b3695668ed98068bdd9d25477748fff65232ad925cdec87710e299b4",
+      "markdown": "DRAFT 0.1 · C++26 · 14 OCTOBER 2026"
+    },
+    {
+      "id": "bfc50d32-3ba6-496d-9981-fbd361043a7f",
+      "kind": "markdown",
+      "hash": "55e1929c601861b932a3d860163b63bfd43e54a89489b85265a80e05a00bff4a",
+      "markdown": "Use a small set of familiar C++ features. Make ownership, lifetime, and control flow clear. Add an abstraction only when it makes the whole program easier to understand."
+    },
+    {
+      "id": "2f5fb932-6f5e-4eac-84d4-62059fdf5800",
+      "kind": "markdown",
+      "hash": "7eb9de30ac8789a39b66bbd8453020842d5e86942de3c01c45f0ac995e4a5975",
+      "markdown": "# Scope and statuses"
+    },
+    {
+      "id": "4a620348-f421-4cc4-97d1-e95b7d86ea41",
+      "kind": "markdown",
+      "hash": "13dee7ffc5238155f7ea9a62f6576b2a73f481b5389f4a684a86deceed368811",
+      "markdown": "Apply this policy to all project-authored code, including application code, helpers, utilities, and boundary adapters. References to application code below include helpers and utilities; boundary adapters receive only the explicitly stated exceptions. Dependencies may use other features internally. Calling a standard container or enkiTS does not override restrictions on project-authored implementation techniques."
+    },
+    {
+      "id": "a5ebfa77-9580-4e4d-a6ee-af54e53a75f5",
+      "kind": "markdown",
+      "hash": "c450434abb5bc6b1aa3b12de96f9311007778c9481e7f0fef04a806dcf1a8a78",
+      "markdown": "Language features and library facilities are allowed unless restricted or banned below."
+    },
+    {
+      "id": "bacd9b27-3d5e-4e87-a158-44ed1d80b1f7",
+      "kind": "markdown",
+      "hash": "314190e89becf407d45a56336185fcb183101370e675740903ad7b164c5efd58",
+      "markdown": "| Status | Meaning |\n| --- | --- |\n| **Allowed** | Permitted when useful; not automatically preferred. Defaults are stated explicitly. |\n| **Restricted** | Permitted only for the stated purpose, without approval for each qualifying use. |\n| **Banned** | Not permitted in application code, except at an explicitly allowed boundary. |"
+    },
+    {
+      "id": "3ecdf68a-a855-41b3-b937-9dc6adb71eea",
+      "kind": "markdown",
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "markdown": ""
+    },
+    {
+      "id": "b4cf58a4-5c14-4ca3-ac5c-fa0c23e570e5",
+      "kind": "markdown",
+      "hash": "cce9a61abe8f75618f4ddb2969b844356eddf29f1c6b5164a279501f53499922",
+      "markdown": "**Boundary code** connects an external library, resource, platform, or diagnostic service to application code. Keep extra permissions local; a separate binary library is not required."
+    },
+    {
+      "id": "a19b7235-6e2d-4bc8-863d-06b3e8f8da12",
+      "kind": "markdown",
+      "hash": "0065cfda8d2cf0f85704728c1d49fe1cd897b6e303d7ff6af3d2f641402b1c0a",
+      "markdown": "# Data and ownership"
+    },
+    {
+      "id": "0c3127f1-1ed4-499f-969e-071524c87cea",
+      "kind": "markdown",
+      "hash": "66cadffbb9df62adcddea76909bbfbe1af960aa9f2a5ba78a2ca78af30f069ea",
+      "markdown": "**Default:** values, direct ownership, and RAII for scope-exit cleanup, including exception unwinding."
+    },
+    {
+      "id": "53402fe1-663a-4328-84f7-6b6e586290f6",
+      "kind": "markdown",
+      "hash": "c009eaf58b5b1921a8e68d92273f9b59969148a9f7dd514a1c22c8a99414c09b",
+      "markdown": "| Type | Meaning |\n| --- | --- |\n| `T` | Value; its type manages owned resources |\n| `T&`, `const T&` | Required borrow |\n| `T*`, `const T*` | Optional borrow, never raw ownership |\n| `std::span<T>`, `std::span<const T>` | Mutable or read-only contiguous borrow; `const span<T>` does not make elements const |\n| `std::string_view` | Borrowed text; no null-termination guarantee |\n| `std::unique_ptr<T>` | Exclusive indirect ownership when a value is unsuitable |\n| `std::shared_ptr<T>`, `std::weak_ptr<T>` | **Restricted:** explicit shared lifetime; define who may retain objects and avoid cycles |"
+    },
+    {
+      "id": "576b5f2d-0d63-474c-aeed-d0ea40e649c9",
+      "kind": "markdown",
+      "hash": "f3a9a139762e37a60820bdb90a6684c3b91d9e976c1c3e83e71c82c8f9898f9e",
+      "markdown": "**Default data style:** `struct` records with public fields, `enum class` choices, and named result records for domain interfaces. Use constructors, private data, and destructors for ownership or real invariants. Avoid accessors that merely repeat field access. Small member and free functions are allowed. Initialize values before use."
+    },
+    {
+      "id": "b8e63506-6a85-4731-9f99-6f0db8ecd95e",
+      "kind": "markdown",
+      "hash": "c1c0682fa4132ea89f9bdeb2fa44039d1ce2563b6d19a1fcb3942fdfe5f2a19a",
+      "markdown": "Use implicit or defaulted special members when correct; write them only for ownership or invariants. Records need not have C-compatible layout. Prefer designated initialization for records, in declaration order; omitted fields follow aggregate initialization rules. For other types, choose the intended constructor rather than requiring braces everywhere."
+    },
+    {
+      "id": "d0d3b5e9-bd7c-42d8-9a28-bd984652fdba",
+      "kind": "markdown",
+      "hash": "0bd30c295bc960a0d3c27f8c7819917d49ce669da748d23a4a5874b83dfbe409",
+      "markdown": "```cpp\nstruct Window {\n    int width;\n    int height;\n    bool visible;\n};\n\nWindow window{\n    .width = 1280,\n    .height = 720,\n    .visible = true\n};\n```"
+    },
+    {
+      "id": "13cf8688-8562-4490-8011-b40b76362de6",
+      "kind": "markdown",
+      "hash": "4c614f8c49ecc6f3cf67caf77a36d2d49b968b6060283b5150b2a14972c1da9c",
+      "markdown": "Use a named factory returning `std::expected<Resource, Error>` for fallible acquisition. Report fallible completion, such as commit or flush, through an explicit operation. Keep destructors nonthrowing."
+    },
+    {
+      "id": "020c9c85-3348-40f6-988e-5b643a1bb7ab",
+      "kind": "markdown",
+      "hash": "4d02d0e5f830eefe7597106d40bf80e64f4567891a98cca5bca8d23dcb9a7ed8",
+      "markdown": "**Restricted:** mutable globals and `thread_local` state for runtime or platform needs. Prefer explicit state parameters."
+    },
+    {
+      "id": "c97a116b-d2d2-4c2f-8279-a5d2696d89d1",
+      "kind": "markdown",
+      "hash": "dcda74616a5cedd1b7811bec87fef5431959105189155c13d63aa58cbc78db0f",
+      "markdown": "**Restricted:** borrowed members in explicit views or objects with a clear owner relationship. Stored callbacks need explicit lifetimes. Avoid views into a record's own movable storage."
+    },
+    {
+      "id": "057b224e-baee-492f-be78-93edfdb69776",
+      "kind": "markdown",
+      "hash": "db99005d126c908021855df91d68c06d54f2af0b47a99e55847d23de33c96ae4",
+      "markdown": "**Banned:** raw owning pointers, direct `new`/`delete`, and manual allocation/free pairs, except at resource or allocation boundaries. Use RAII instead of repeated cleanup."
+    },
+    {
+      "id": "af7ab927-2acd-4aea-a54a-4f69ad722490",
+      "kind": "markdown",
+      "hash": "4dfc084a97191111805d391f9cfa4fb7e4f45236c7aa898e790ef60ab030f69c",
+      "markdown": "Keep every borrow within its owner's valid lifetime. Views do not establish bounds safety or extend lifetimes; container mutation can invalidate them. Establish validity before access."
+    },
+    {
+      "id": "c4bf2e87-c5e8-4f0b-9f15-c8bd61486fdf",
+      "kind": "markdown",
+      "hash": "21956b7edc87f9ccf9c83ede4818c30013c81c6dc5c8f3775b10eb471be5d873",
+      "markdown": "# Functions and generics"
+    },
+    {
+      "id": "f9665274-5658-4793-845b-c850808a0465",
+      "kind": "markdown",
+      "hash": "6b2ffe2c3c7729abebcf6467a1b9a06a609a0b828380c317b2dfdfdcbde0c1ed",
+      "markdown": "| Feature | Conditions and defaults |\n| --- | --- |\n| Local `auto` | Relevant type clear from initializer; spell `auto&` or `const auto&` for borrows |\n| Structured bindings | Short local decompositions; choose copy or reference deliberately and retain useful domain names |\n| Lambdas | Short; `[&]` for clear synchronous nonescaping use, explicit captures for stored or scheduled work |\n| Functions | Explicit public parameter/return types except simple generics; prefer direct calls and early returns |\n| Simple templates | Same operation or structure across types or fixed sizes |\n| Compile-time operations | `constexpr`, `static_assert`, and `constinit` are allowed; `consteval` for small necessarily compile-time operations |"
+    },
+    {
+      "id": "236cad9f-762e-45f7-9cd6-a998ee876b62",
+      "kind": "markdown",
+      "hash": "a97ca3c54ada1f86bf3f9a512e569759e4ac199803a2a0a3ec7880e9f3deb94f",
+      "markdown": "## Callback types"
+    },
+    {
+      "id": "90a28fdc-7ced-4295-a920-31f540b76e4c",
+      "kind": "markdown",
+      "hash": "9e11cec423c4266cedba849f1a907dab839f0c97e193791375031a2d1b76309b",
+      "markdown": "**Callback defaults:** function pointer for captureless calls; `std::function_ref` for use only during the call; `std::move_only_function` for owning stored callbacks. A callable template parameter is allowed in a small generic algorithm."
+    },
+    {
+      "id": "a246aaeb-36f8-47e1-8f40-94c185b5d3e4",
+      "kind": "markdown",
+      "hash": "fac3c0da8eb0ee0951bda8d8551e02fb39e3cbb952158cb61e0bdf8109377ea0",
+      "markdown": "Use `std::copyable_function` for new interfaces requiring copyable ownership; reserve `std::function` for existing-interface compatibility, including enkiTS `TaskSet` storage. `move_only_function` and `copyable_function` must contain a target before invocation."
+    },
+    {
+      "id": "c88aa8e6-b6fd-485b-bb45-58e28f982849",
+      "kind": "markdown",
+      "hash": "9edbf0de20c8df30a0cd70d1f39178616cfa9135751af5be2ee1a900a62275be",
+      "markdown": "## Generic programming"
+    },
+    {
+      "id": "c2d6fcde-ac66-4ba5-9170-a77d304bab30",
+      "kind": "markdown",
+      "hash": "cdb7c6bbbe3166da695c603c27d61ae54aef0f42429fd79ef666b6a91b9909e0",
+      "markdown": "Simple constraints, direct type queries, and simple invocation remain allowed. Use standard or short custom concepts, simple `requires` expressions/clauses, and straightforward `if constexpr` branches with readable overload selection."
+    },
+    {
+      "id": "7e1c9454-d446-4fb7-a444-fc88b0552012",
+      "kind": "markdown",
+      "hash": "06150d01ec44e72916a525a6646ac152b8404d077d19b72fb7fdd65fbb38d2e3",
+      "markdown": "**Banned:** SFINAE, `enable_if`, SFINAE-based detection idioms and detection frameworks, recursive type computation, type-list, type-dispatch, or expression-template frameworks, CRTP, and template DSLs. Concepts do not make these designs acceptable."
+    },
+    {
+      "id": "ec31efd1-43cf-46ea-bed8-e6b33ba20c75",
+      "kind": "markdown",
+      "hash": "6b13d1a75468200d9ec4562a4c7192ea4641316b50309f70a585b425cc328375",
+      "markdown": "**Restricted:** variadic templates, perfect forwarding, custom deduction guides, `decltype(auto)`, explicit object parameters, and specialization machinery are permitted only in small adapters needed to call an external API or implement a resource wrapper. Keep these features out of ordinary application interfaces; do not expose policy frameworks. **Allowed:** small `std::formatter<T>` and `std::hash<T>` specializations for project-defined types. A formatter may delegate to, or use single public inheritance from, an existing formatter solely to reuse formatting behavior."
+    },
+    {
+      "id": "2467d245-e7b3-48b0-9beb-10ffa734f5ea",
+      "kind": "markdown",
+      "hash": "7e7bfaffff51ba4284496054db08b59a5791880cb1845f409544439807604c00",
+      "markdown": "# Type behavior and low-level code"
+    },
+    {
+      "id": "6ad01641-204b-4a5b-90aa-5a6a2bfdd72c",
+      "kind": "markdown",
+      "hash": "07fd58c8e8965e335749543e529dc492d94f4bb3acece4ed6c71811c2a339442",
+      "markdown": "| Status and feature | Rule |\n| --- | --- |\n| **Restricted** inheritance | One public data-free pure-virtual interface base with a virtual destructor; use `override`, normally `final`. Subclasses required by external-library interfaces and the narrow formatter reuse exception are allowed. No domain hierarchy from these exceptions; prefer composition. |\n| **Restricted** operators | Equality, meaningful ordering, natural arithmetic, conventional container/callable operations, and conventional bitwise `enum class` flag operators. Default comparisons only when memberwise semantics fit. |\n| **Restricted** conversions | Converting constructors and conversion operators must be `explicit`, except normal copy/move constructors. Explicit Boolean validity tests need one clear meaning. Prefer named functions for other conversions. |\n| **Restricted** raw unions | Including tagged unions: named low-level or interoperability boundaries only; ordinary alternatives use `std::variant`. |\n| **Restricted** representation access | `reinterpret_cast`, `const_cast`, placement construction, raw byte operations, and layout attributes: named low-level boundaries with stated alignment, lifetime, aliasing, and size requirements. |\n| **Banned** complex inheritance | Implementation inheritance except subclasses required by external-library interfaces and narrow formatter reuse; multiple and virtual inheritance remain banned. No derivation from standard containers to add data or change behavior. |\n| **Banned** hidden expression behavior | Overloaded logical/comma operators, control-flow or pipeline operator languages, and implicit conversion chains. |\n| **Banned** unsafe access | C-style casts, unchecked downcasts, unchecked narrowing, and raw pointer arithmetic. Use bounded access. A narrowing cast is allowed when the value is already known to fit the target type; no redundant checked-conversion helper is required. |\n| **Banned** extensions | Computed goto, variable-length arrays, and GNU statement expressions. |"
+    },
+    {
+      "id": "657e8ece-f5a3-4b2c-8262-f01f9a8cc218",
+      "kind": "markdown",
+      "hash": "38bb77fe85978695b0238a3549c42b7a9dd378e07962823d8ccb4d38854ebd0a",
+      "markdown": "# Errors and contracts"
+    },
+    {
+      "id": "419bbbe5-3964-49ce-9098-59e5de43a7d2",
+      "kind": "markdown",
+      "hash": "b95d831df72ba04890adc3725d337e3ac1bfd4c9d41b731a1388b569c0ea993e",
+      "markdown": "| **Condition** | **Default response** |\n| --- | --- |\n| Ordinary absence | Use `std::optional<T>`. |\n| Ordinary operation failure | Use `std::expected<T, Error>`. Mark fallible project APIs `[[nodiscard]]`. |\n| Programming mistake | Use a checked contract or the project's fail-fast check. |\n| A library exception | Handle it at a defined operation, application, or task boundary. |"
+    },
+    {
+      "id": "1a7b6448-37ba-4e7d-b6ae-c3adbf0f1af9",
+      "kind": "markdown",
+      "hash": "e562913e19e82352ed21cc66d68ede36ec7597e85cecde223b3ea8c0cbf3554e",
+      "markdown": "Prefer named error records and explicit checks before value access. Do not use `expected::value()` for ordinary propagation. Do not use error-propagation macros. Do not use long error-combinator chains."
+    },
+    {
+      "id": "9a92bbf2-f6f2-4768-887a-209d1a552db1",
+      "kind": "markdown",
+      "hash": "aed33c80f7d622ffcf54de25b6a4c25ca23fed1f09bc718f393bbc90fead5e73",
+      "markdown": "**Exceptions stay enabled.** No `-fno-exceptions`. Do not write `throw` or project exception classes for application errors. A formatter may throw `std::format_error` when required by the formatting protocol. Catch only at defined boundaries or in tests; tests may use throwing stubs."
+    },
+    {
+      "id": "c28137e9-7538-4257-b9c0-6190d5d5b3ad",
+      "kind": "markdown",
+      "hash": "25718939aa22e39409633941f1ebe4b246acba125905a3472a4320efc54cacd0",
+      "markdown": "`expected` does not prevent allocation or dependency exceptions. Keep resources safe to unwind. Use `noexcept` only when the full operation cannot throw or escaping exceptions must terminate."
+    },
+    {
+      "id": "e42ff119-4ede-48a6-a1d9-bc337267472d",
+      "kind": "markdown",
+      "hash": "5746a3190631f450e5d61ea6586aada36d8c82ecf2cd38649649a40797ff36f6",
+      "markdown": "Preserve invariants on failure; RAII does not undo mutations. Build results before committing shared changes where practical. Never report unknown failure as success. Choose allocation-failure policy at a coarse boundary."
+    },
+    {
+      "id": "ca701964-28f9-4744-bf93-795edc177753",
+      "kind": "markdown",
+      "hash": "ac48ffa7419972ef1eec401406410c61c98312db6f525827fc59bfad055a4d4a",
+      "markdown": "**Contracts:** `pre`, `post`, and `contract_assert` for internal obligations where supported; ordinary error results for invalid external input. Predicates must be side-effect-free, deterministic, nonthrowing, and normally nonallocating. Use body checks in virtual functions, where pre/post specifiers are unavailable."
+    },
+    {
+      "id": "fea21f90-f92e-43b3-83a2-33b359a91179",
+      "kind": "markdown",
+      "hash": "271d37ce1c7bae0ebfeb801037d077a4504013a3e53d6416c11ea6f91e4da6fe",
+      "markdown": "# Modules and compiler facilities"
+    },
+    {
+      "id": "e7485c76-03be-4a9d-9179-1b15a9505de0",
+      "kind": "markdown",
+      "hash": "3ae1e37e2c0ebbc6847151f278ea6c93b4f23169bf9a7eb53ab2928f9d333d00",
+      "markdown": "**Default:** named modules with small coherent interfaces. Headers remain allowed when needed by the toolchain or dependencies. Do not require dependencies to provide modules."
+    },
+    {
+      "id": "b28d0367-b20f-4d96-896e-9d78370372a5",
+      "kind": "markdown",
+      "hash": "3b8bd9eb418ee3325b744c273e7f7e69c347cda5057a071f554878794fc1108b",
+      "markdown": "Use `import std;` where supported; facility restrictions still apply. It does not import macros. Put C/OS and macro-dependent headers in boundary units or global module fragments."
+    },
+    {
+      "id": "b42f8513-c32b-4184-8a42-d1e29c03c4cf",
+      "kind": "markdown",
+      "hash": "6a535bf08cafd953c0b8ad853473ebcae2742bf6e0e0fd8d164f02e79fe3323c",
+      "markdown": "No module-per-class organization, deep partition trees, or macros changing public types across translation units. Restrict conditional compilation to build/platform/compatibility code; keep feature checks in build/compatibility code. Application function-like macros are banned; small compatibility/check macros and test-framework macros are allowed."
+    },
+    {
+      "id": "5230f419-e1e6-41f9-a3e5-0d3c352edad6",
+      "kind": "markdown",
+      "hash": "c90cdea505ee63a7b703f6da55e2bc1cbdb708943892706f07951b268b730634",
+      "markdown": "| Status and facility | Rule |\n| --- | --- |\n| Lifetime and lock annotations | Keep annotations accurate; `lifetimebound` does not extend lifetime |\n| **Restricted** effect annotations | Clang `nonallocating`/`nonblocking` only when their full contracts hold; neither implicitly specifies `noexcept` |\n| **Restricted** low-level optimization | Intrinsics, checked-overflow builtins, `__restrict__`, special layout: small reviewed implementations with explicit preconditions and evidence |\n| **Banned** unchecked assumptions | No `[[assume]]`, `__builtin_assume`, or `std::unreachable()` in application code |"
+    },
+    {
+      "id": "1a0c8390-8b60-4310-b327-56013af7ca17",
+      "kind": "markdown",
+      "hash": "cfc2912ddc0a212b6d4adb53c3d687c028ecca2d59ee35cc7ec7b2a8ff7af413",
+      "markdown": "# Standard library"
+    },
+    {
+      "id": "d1ba795b-5412-469f-b04f-9ee1a3d7b5b5",
+      "kind": "markdown",
+      "hash": "826a41724aaa6775f6d275b41bf645c402ec880ded9a6137d4fa8bd2696cddbf",
+      "markdown": "Rules classify facilities, not includes. A header never overrides a feature restriction."
+    },
+    {
+      "id": "ec0edf59-fbfb-4338-b7b8-d966d32e323e",
+      "kind": "markdown",
+      "hash": "520a4e8b56ed0f30d85606ce2b78e6480d54d1d2c468d3bad5a178ff41acf56a",
+      "markdown": "Use fixed-width numeric types when representation matters and they are available. Choose associative containers by lookup, ordering, and invalidation behavior. Use `std::pair` for generic protocols and named records for domain results."
+    },
+    {
+      "id": "154df456-adb6-4b15-a010-90901c15b4d6",
+      "kind": "markdown",
+      "hash": "44851f8bfd158d2c72f910d669b88217b3be2a35d10224c42124e7ab666a73da",
+      "markdown": "Use explicit parsing and one formatting style. Output may throw. Use explicit filesystem errors. Numeric and bit facilities do not override the representation-access rules."
+    },
+    {
+      "id": "31a601fa-8c96-4307-877c-3b98d5493c6a",
+      "kind": "markdown",
+      "hash": "b41a8172858ecee2edc3987d22b00fead72002fd27de6145d28a954198dc3bcb",
+      "markdown": "## Restricted facilities"
+    },
+    {
+      "id": "de033589-101e-425d-83fd-58af255fce32",
+      "kind": "markdown",
+      "hash": "ddaaebee45d80a1197872f0e952dd2203382b45f4f5e1f6b9ba7e563aa8e6ba6",
+      "markdown": "Prefer an existing facility that fits the rules."
+    },
+    {
+      "id": "fac2f192-5289-4db4-b041-dcffafc1ae8f",
+      "kind": "markdown",
+      "hash": "9b9748b967e597ec42a947ad5005759f72133640f345c0b94eabf610cd54c132",
+      "markdown": "| Family | Permitted use |\n| --- | --- |\n| `<list>`, `<forward_list>`, `<hive>` | A concrete operation or stability need; keep local, without per-container project wrappers |\n| `<tuple>` | Generic adapters or existing APIs; named domain records remain the default |\n| `<memory_resource>`, `<scoped_allocator>`, and low-level allocation operations | Allocation/resource boundaries; no default allocator-aware records. From `<new>`, this restricts direct allocation/deallocation, placement construction, and allocation-handler management. Naming `std::bad_alloc` at error boundaries and using hardware-interference constants remain allowed |\n| `<mdspan>`, `<linalg>` | Numerical code with explicit layout/result storage; natural operators, no expression types in general interfaces |\n| `<cfenv>` | Subsystem policy with explicit floating-point environment changes |\n| Custom weak-memory-order protocols and lock-free machinery | Synchronization boundaries only |\n| `<exception>`, `<stdexcept>`, `<contracts>`, `<cassert>`, `<stacktrace>`, `<debugging>` | Error boundaries, tests, diagnostics, and the contract rules above; no normal exception-based API or release-check reliance on `assert` |\n| Stream headers | Existing interfaces or specific subsystem needs; prefer project formatting/I/O, no application-wide stream protocol |\n| `<valarray>` | A stated need; avoid overlapping numerical models |\n| Global locale mutation | `std::locale::global` and mutating `setlocale` calls: explicit initialization or locale boundaries only; no global mutation in ordinary application code |\n| C raw allocation and unsafe legacy operations | Raw allocation/free pairs only at resource or allocation boundaries; no unchecked string copying, `rand`, or C-style sorting callbacks. Other C-library facilities, including `std::abs` and `std::div`, remain allowed under the rules above |"
+    },
+    {
+      "id": "63fc0f73-9b5b-4763-ae4a-441f01a14fd5",
+      "kind": "markdown",
+      "hash": "e6bea1e306c81ff870420b57bc604e565a135e8e7e2632a6c457eab19d165770",
+      "markdown": "## Excluded facilities"
+    },
+    {
+      "id": "1f824689-f99b-4e57-a74c-cb64812f6287",
+      "kind": "markdown",
+      "hash": "381f6dedda548a61bd20cf863b158bdb45bb6d9bfc5dd0e9f09786b9352a938c",
+      "markdown": "Banned in application code. Dependencies may use these internally; a necessary compatibility boundary may use only the part it requires."
+    },
+    {
+      "id": "ca824013-a635-460f-8777-6cf6544f705b",
+      "kind": "markdown",
+      "hash": "e7ef6ebae427f6cc14aedb545d5f9441bcea7d4eb70a312b6d437e1ee794926d",
+      "markdown": "| Excluded facilities | Rule or exception |\n| --- | --- |\n| `<any>`, `<typeinfo>`, `<typeindex>` and RTTI | No open-ended dynamic values, `dynamic_cast`, `typeid`, or runtime-type registries; use records, variants, or explicit interfaces |\n| `<future>`, `<execution>` | No `async`, promises, packaged tasks, futures, execution-policy overloads, sender/receiver composition, or standard execution tasks. Use enkiTS completion and explicit result storage |\n| `<coroutine>`, `<generator>` | No application coroutines or machinery; asynchronous I/O requires a separate explicit policy |\n| Lazy ranges and iterator frameworks | No lazy adaptors (including `filter`/`transform`), view pipelines, custom range frameworks, or iterator frameworks. Ordinary views, passive wrappers describing existing data (`std::ranges::subrange`, `std::ranges::ref_view`), simple iterator utilities, and eager standard algorithms (including `std::ranges::sort`) remain allowed |\n| `<meta>` and expansion statements | No application reflection or generic record-generation system; a small reviewed code-generation utility may use them internally |\n| `<csetjmp>`, `<cstdarg>` | No nonlocal jumps or C varargs except required C adapters |\n| `<hazard_pointer>`, `<rcu>` | No application reclamation model; required implementations belong in reviewed synchronization boundaries |\n| Other excluded symbols | `std::vector<bool>`, `std::bind`, placeholder expressions, custom allocator policy families |"
+    },
+    {
+      "id": "a75e7354-4421-432a-88cc-58063522d823",
+      "kind": "markdown",
+      "hash": "7d3292eb5c9f871318dd7557a09fa18b8694b0cdff9d2e6b3b0ccade587257a5",
+      "markdown": "# enkiTS"
+    },
+    {
+      "id": "47880f3c-2337-4d45-b5a4-6616b78cd694",
+      "kind": "markdown",
+      "hash": "113c07cba2b8321a50eb9a2f76ef55c0f311ef949053d915e22026df35dc93b2",
+      "markdown": "Use one enkiTS scheduler for CPU task parallelism; prefer synchronous functions when parallel work is not useful. No default custom `Task<T>`, executor hierarchy, task-group framework, or second CPU task scheduler. This rule does not limit ordinary thread or synchronization use."
+    },
+    {
+      "id": "b5a206cb-4955-48da-8823-c55c7611dc50",
+      "kind": "markdown",
+      "hash": "cb5ee91d358e78ac91085bc542522776a571f3c0aebc7fa708c02bbca3090593",
+      "markdown": "**Default surface:** `AddTaskSetToPipe` and `WaitforTask` for finite batches; `ITaskSet` and `TaskSetPartition` for range work; `enki::TaskSet` when its callable storage is acceptable, or a final `ITaskSet` adapter."
+    },
+    {
+      "id": "d4a9ede2-324e-4e9c-92fc-525879cf1087",
+      "kind": "markdown",
+      "hash": "23e5336a847bc904b7543e5aa09cbdfa76317266587bca04e62f239946985b34",
+      "markdown": "**No exception may escape a task callback.**"
+    },
+    {
+      "id": "9e886d29-cf35-47d0-b261-b0cf3b6cb767",
+      "kind": "markdown",
+      "hash": "7271d29c044006894b032a41593262c1bbeee1dc1486b905a1dcb2e4e29e255a",
+      "markdown": "**Restricted:** pinned tasks, dependency graphs, priorities, and custom scheduler allocation require a concrete need."
+    }
+  ]
+}

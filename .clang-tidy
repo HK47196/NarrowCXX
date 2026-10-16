@@ -1,0 +1,43 @@
+# Narrow C++ enforcement profile, discovered automatically in this checkout.
+# Load the matching libNarrowTidy with --load; configuration does not load plugins.
+InheritParentConfig: false
+Checks: >-
+  -*,
+  narrow-*,
+  bugprone-dangling-handle,
+  bugprone-exception-escape,
+  bugprone-narrowing-conversions,
+  bugprone-unchecked-optional-access,
+  bugprone-unused-raii,
+  bugprone-use-after-move,
+  cppcoreguidelines-pro-type-const-cast,
+  cppcoreguidelines-pro-type-reinterpret-cast,
+  cppcoreguidelines-pro-type-static-cast-downcast,
+  cppcoreguidelines-virtual-class-destructor,
+  modernize-use-designated-initializers,
+  modernize-use-equals-default,
+  modernize-use-override
+# Bans fail the invocation. Restricted uses and style/safety assistance stay
+# warnings; mixed diagnostic families have separate check names.
+WarningsAsErrors: >-
+  -*,
+  narrow-no-*,
+  narrow-excluded-library,
+  narrow-known-narrowing,
+  narrow-exceptions-enabled,
+  narrow-restricted-c-varargs,
+  bugprone-narrowing-conversions,
+  cppcoreguidelines-pro-type-static-cast-downcast
+HeaderFilterRegex: '.*'
+SystemHeaders: false
+CheckOptions:
+  bugprone-narrowing-conversions.WarnWithinTemplateInstantiation: 'true'
+  # Every const_cast is a restricted representation-access site, even when
+  # adding qualifiers. The upstream default diagnoses only qualifier removal.
+  cppcoreguidelines-pro-type-const-cast.StrictMode: 'true'
+  modernize-use-designated-initializers.IgnoreSingleElementAggregates: 'false'
+  modernize-use-designated-initializers.StrictCppStandardCompliance: 'true'
+  # The policy asks for override and normally final; it does not ban a repeated
+  # virtual keyword. Preserve both policy-compatible spellings.
+  modernize-use-override.AllowOverrideAndFinal: 'true'
+  modernize-use-override.AllowVirtualAndOverride: 'true'
